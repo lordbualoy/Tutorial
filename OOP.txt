@@ -1,0 +1,45 @@
+c# inheritance
+class ลูกจะมี class แม่ได้ class เดียวเท่านั้น แต่สามารถ implement interface ได้ 0 อัน, 1 อัน หรือมากกว่า
+ 
+สมมติเราประกาศ class ชื่อ ABC และ DEF ไว้ว่า
+class ABC
+และ
+Class DEF : System.Object
+ตามลำดับ
+ผลที่เกิดคือ Class ABC ถึงไม่ได้กำหนดให้ inherit จาก class อะไรเลย แต่ compiler จะไปจับให้ inherit จาก System.Object ตอนจังหวะ compile อยู่ดี
+เท่ากับ class ทุก class ใน .Net จะเป็นลูกของ System.Object ทั้งหมด
+ 
+constructor และ deconstructor จะไม่ถูก inherit มาด้วย
+แต่เวลาสร้าง class ลูกแล้วต้องการใช้ constructor ของ class แม่ สามารถทำได้โดยการ
+แม่ = Foo
+public Foo(int i) { do stuff; }
+public Foo(int i, int j) { do stuff; }
+ 
+ลูก = Bar : Foo
+public Bar(int i): base(i) {}
+public Bar(int i, int j) : base(i, j) {}
+ 
+ซึ่งทำแบบนี้จะทำให้ compiler ไม่ต้องไปเดามั่วว่า class ลูกต้องมี constructor อะไรจากแม่บ้าง
+
+// Default constructor. If a derived class does not invoke a base-
+// class constructor explicitly, the default constructor is called
+// implicitly. 
+ 
+// Static constructor to initialize the static member, currentID. This
+// constructor is called one time, automatically, before any instance
+// of WorkItem or ChangeRequest is created, or currentID is referenced.
+static WorkItem()
+{
+	currentID = 0;
+}
+
+
+overriding ต้องมี class modifier 2 ตัวที่ทำงานร่วมกันด้วยถึงจะทำได้ เช่น
+class แม่ Foo
+protected virtual A() { do stuff; }
+protected B() { do stuff; }
+ 
+class ลูก Bar : Foo
+protected override A() { do stuff; }
+protected B() { do stuff; }
+ต้องเป็นแบบ method A ที่ class แม่มี virtual แล้ว class ลูกมี override ถึงจะใช้การ override ได้สำเร็จ
