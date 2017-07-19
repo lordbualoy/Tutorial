@@ -1,0 +1,25 @@
+select t.RDB$RELATION_NAME TableName
+,c.RDB$FIELD_NAME ColumnName
+--,columnwithtype.RDB$FIELD_NAME
+,coltype.RDB$TYPE_NAME Type
+from RDB$RELATIONS t
+inner join RDB$RELATION_FIELDS c
+on t.RDB$RELATION_NAME=c.RDB$RELATION_NAME
+inner join RDB$FIELDS columnwithtype
+on c.RDB$FIELD_SOURCE=columnwithtype.RDB$FIELD_NAME
+inner join RDB$TYPES coltype
+on columnwithtype.RDB$FIELD_TYPE=coltype.RDB$TYPE
+where coltype.RDB$FIELD_NAME='RDB$FIELD_TYPE'
+order by t.RDB$RELATION_NAME asc, c.RDB$FIELD_NAME asc;
+
+--type guessing
+--BLOB		=	blob
+--DATE		=	date
+--DOUBLE	=	system table
+--INT64		=	numeric(18,4)??
+--LONG		=	int32
+--SHORT		=	numeric(1,0)??
+--TEXT		=	system table
+--TIME		=	time
+--TIMESTAMP	=	timestamp
+--VARYING	=	varchar

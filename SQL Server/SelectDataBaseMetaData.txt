@@ -1,0 +1,9 @@
+select t.name TableName
+,c.name ColumnName
+,coltype.name Type
+from [MSBigBox].[sys].[tables] t
+inner join [MSBigBox].[sys].[columns] c
+on t.object_id=c.object_id
+inner join [MSBigBox].[sys].[types] coltype
+on c.system_type_id=coltype.system_type_id
+order by t.name asc, c.name asc;

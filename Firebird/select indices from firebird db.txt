@@ -1,0 +1,57 @@
+select trim(coalesce(a.RDB$RELATION_NAME,substring(b.RDB$INDEX_NAME FROM 5))) table_name,trim(coalesce(a.RDB$CONSTRAINT_NAME,a.RDB$INDEX_NAME,b.RDB$INDEX_NAME)) constraint_name,
+	case coalesce(a.RDB$CONSTRAINT_TYPE,substring(b.RDB$INDEX_NAME from 1 for 3))
+		when 'PBC' then 'SYSTEM'
+		when 'RDB' then 'SYSTEM'
+		when 'XAK' then 'ALTERNATE KEY'
+		when 'XIE' then 'LOOKUP INDEX'
+		else trim(coalesce(a.RDB$CONSTRAINT_TYPE,b.RDB$INDEX_NAME))
+	end constraint_type,
+trim(coalesce(c.RDB$CONST_NAME_UQ,b.RDB$FIELD_NAME,d.RDB$TRIGGER_NAME)) column_name
+from RDB$RELATION_CONSTRAINTS a
+full join RDB$INDEX_SEGMENTS b
+on a.RDB$INDEX_NAME=b.RDB$INDEX_NAME
+left join RDB$REF_CONSTRAINTS c
+on a.RDB$CONSTRAINT_NAME=c.RDB$CONSTRAINT_NAME
+left join RDB$CHECK_CONSTRAINTS d
+on a.RDB$CONSTRAINT_NAME=d.RDB$CONSTRAINT_NAME
+
+union
+
+select trim(a.RDB$RELATION_NAME) table_name,trim(c.RDB$CONSTRAINT_NAME) constraint_name,
+	'REVERSE FOREIGN KEY' constraint_type,
+trim(c.RDB$CONST_NAME_UQ) column_name
+from RDB$RELATION_CONSTRAINTS a
+inner join RDB$REF_CONSTRAINTS c
+on a.RDB$CONSTRAINT_NAME=c.RDB$CONST_NAME_UQ
+
+union
+
+select 'EMPPASSONLY' table_name,'XPKEMPLOYEE' constraint_name,
+	'PRIMARY KEY' constraint_type,
+	'SYSEMPID' column_name
+from COMPANY
+
+union
+
+select 'PERSONPOINTONLY' table_name,'XPKPERSON' constraint_name,
+	'PRIMARY KEY' constraint_type,
+	'SYSPERSONID' column_name
+from COMPANY
+
+union
+
+select 'TRANSAPPROVE' table_name,'XPKTRANS' constraint_name,
+	'PRIMARY KEY' constraint_type,
+	'SYSTRANNO' column_name
+from COMPANY
+
+union
+
+select 'TRANSFINISH' table_name,'XPKTRANS' constraint_name,
+	'PRIMARY KEY' constraint_type,
+	'SYSTRANNO' column_name
+from COMPANY
+
+order by 1 asc, 3 asc, 2 asc
+--order by table_name asc, constraint_type asc, constraint_name asc
+;
