@@ -1,0 +1,7 @@
+declare @temp table (sysunitid int,ordinary int,unitname varchar(max), shortname varchar (max));
+
+insert into @temp (sysunitid ,ordinary ,unitname , shortname)
+select sysunitid ,ordinary ,unitname , shortname
+from UNITNAME;
+
+select * from @temp;
