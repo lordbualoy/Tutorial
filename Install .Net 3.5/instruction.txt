@@ -1,0 +1,3 @@
+-Insert your Windows 10 DVD, or double click its ISO image, or insert your bootable flash drive with Windows 10, depending on what you have.
+-Find sources\sxs in DVD
+-Dism /online /enable-feature /featurename:NetFX3 /All /Source:E:\sources\sxs /LimitAccess
