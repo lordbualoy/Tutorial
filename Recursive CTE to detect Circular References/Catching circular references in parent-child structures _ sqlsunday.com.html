@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)https://sqlsunday.com/2016/04/04/catching-circular-references/ -->
+<html lang="en" class="wf-quattrocentosans-n4-active wf-quattrocentosans-i4-active wf-quattrocentosans-n7-active wf-quattrocentosans-i7-active wf-raleway1-n6-active wf-active"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script async="" src="https://graph.facebook.com/?callback=WPCOMSharing.update_facebook_count&amp;ids=https%3A%2F%2Fsqlsunday.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F&amp;_=1498031694501"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catching circular references in parent-child structures | sqlsunday.com</title>
+<link rel="profile" href="http://gmpg.org/xfn/11">
+<link rel="pingback" href="https://sqlsunday.com/xmlrpc.php">
+
+<script defer="" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/beacon.js.download"></script><script src="./Catching circular references in parent-child structures _ sqlsunday.com_files/webfont.js.download" type="text/javascript" async=""></script><script type="text/javascript">
+  WebFontConfig = {"google":{"families":["Quattrocento+Sans:r,i,b,bi:latin,latin-ext"]},"typekit":{"id":"hep5tpg"}};
+  (function() {
+    var wf = document.createElement('script');
+    wf.src = 'https://s1.wp.com/wp-content/plugins/custom-fonts/js/webfont.js';
+    wf.type = 'text/javascript';
+    wf.async = 'true';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(wf, s);
+	})();
+</script><style id="jetpack-custom-fonts-css">.wf-active body, .wf-active button, .wf-active input, .wf-active select, .wf-active textarea{font-family:"Quattrocento Sans",sans-serif;font-size:12.6px}.wf-active blockquote{font-family:"Quattrocento Sans",sans-serif}.wf-active sub, .wf-active sup{font-size:52.5%}.wf-active small{font-size:52.5%}.wf-active big{font-size:87.5%}.wf-active table{font-size:11.2px}.wf-active button, .wf-active input, .wf-active select, .wf-active textarea{font-size:70%}.wf-active button, .wf-active input[type="button"], .wf-active input[type="reset"], .wf-active input[type="submit"]{font-family:"Quattrocento Sans",sans-serif}.wf-active .main-navigation li:before{font-size:11.2px}.wf-active .main-navigation a, .wf-active .main-navigation a:visited{font-size:9.1px}.wf-active .main-navigation a{font-size:9.1px}.wf-active .site-main .comment-navigation, .wf-active .site-main .paging-navigation, .wf-active .site-main .post-navigation{font-size:11.2px}.wf-active .widget{font-size:11.2px}.wf-active .widget_search .search-field{font-family:"Quattrocento Sans",sans-serif}.wf-active .widget_search .search-submit{font-family:"Quattrocento Sans",sans-serif}.wf-active .entry-meta{font-size:9.8px}.wf-active .featured-image .flag{font-size:8.4px}.wf-active .entry-tags a{font-size:8.4px}.wf-active #infinite-handle span{font-family:"Quattrocento Sans",sans-serif;font-size:11.2px}.wf-active .wp-caption-text{font-size:9.8px}.wf-active .site-info{font-size:9.8px}.wf-active .comment-metadata{font-size:9.8px}.wf-active .comment-metadata .edit-link a{font-size:8.4px}.wf-active .comment-author{font-size:14px}.wf-active .comment-actions a{font-size:8.4px}.wf-active .pingback .comment-edit-link, .wf-active .trackback .comment-edit-link{font-size:8.4px}.wf-active h1{font-family:"raleway-1","raleway-2",sans-serif;font-size:25.2px;font-weight:600;font-style:normal}.wf-active h2{font-family:"raleway-1","raleway-2",sans-serif;font-size:21px;font-weight:600;font-style:normal}.wf-active h3{font-family:"raleway-1","raleway-2",sans-serif;font-size:18.9px;font-weight:600;font-style:normal}.wf-active h4{font-family:"raleway-1","raleway-2",sans-serif;font-size:15.4px;font-style:normal;font-weight:600}.wf-active h5{font-family:"raleway-1","raleway-2",sans-serif;font-size:14px;font-style:normal;font-weight:600}.wf-active h6{font-family:"raleway-1","raleway-2",sans-serif;font-size:11.2px;font-weight:600;font-style:normal}.wf-active .widget-title{font-family:"raleway-1","raleway-2",sans-serif;font-size:9.8px;font-weight:600;font-style:normal}.wf-active .entry-title{font-family:"raleway-1","raleway-2",sans-serif;font-size:31.5px;font-weight:600;font-style:normal}.wf-active .page-title{font-size:11.2px;font-weight:600;font-style:normal}.wf-active .format-aside .entry-title, .wf-active .format-quote .entry-title{font-size:12.6px;font-style:normal;font-weight:600}.wf-active .site-title{font-weight:600;font-size:21px;font-family:"raleway-1","raleway-2",sans-serif;font-style:normal}.wf-active .site-description{font-family:"raleway-1","raleway-2",sans-serif;font-size:12.6px;font-weight:600;font-style:normal}.wf-active .comments-title{font-size:21px;font-weight:600;font-style:normal}</style>
+<meta name="google-site-verification" content="rUmOs-tkqb7Aghyf4V40cvho1nlPZylooGAR23L1lp8">
+<meta name="msvalidate.01" content="49BA9339CEE6ADDB2FEC23C3CCF8A9FD">
+		<link rel="stylesheet" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/css" media="all"><script src="./Catching circular references in parent-child structures _ sqlsunday.com_files/remote-login.php" type="text/javascript"></script>
+		<script type="text/javascript">
+		/* <![CDATA[ */
+			if ( 'function' === typeof WPRemoteLogin ) {
+				document.cookie = "wordpress_test_cookie=test; path=/";
+				if ( document.cookie.match( /(;|^)\s*wordpress_test_cookie\=/ ) ) {
+					WPRemoteLogin();
+				}
+			}
+		/* ]]> */
+		</script>
+		<link rel="dns-prefetch" href="https://s2.wp.com/">
+<link rel="dns-prefetch" href="https://s0.wp.com/">
+<link rel="dns-prefetch" href="https://dhmacher.wordpress.com/">
+<link rel="dns-prefetch" href="https://fonts.googleapis.com/">
+<link rel="dns-prefetch" href="https://s1.wp.com/">
+<link rel="alternate" type="application/rss+xml" title="sqlsunday.com » Feed" href="https://sqlsunday.com/feed/">
+<link rel="alternate" type="application/rss+xml" title="sqlsunday.com » Comments Feed" href="https://sqlsunday.com/comments/feed/">
+<link rel="alternate" type="application/rss+xml" title="sqlsunday.com » Catching circular references in parent-child structures Comments Feed" href="https://sqlsunday.com/2016/04/04/catching-circular-references/feed/">
+	<script type="text/javascript">
+		/* <![CDATA[ */
+		function addLoadEvent(func) {
+			var oldonload = window.onload;
+			if (typeof window.onload != 'function') {
+				window.onload = func;
+			} else {
+				window.onload = function () {
+					oldonload();
+					func();
+				}
+			}
+		}
+		/* ]]> */
+	</script>
+			<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/wpcom-smileys\/twemoji\/2\/72x72\/","ext":".png","svgUrl":"https:\/\/s0.wp.com\/wp-content\/mu-plugins\/wpcom-smileys\/twemoji\/2\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/s1.wp.com\/wp-includes\/js\/wp-emoji-release.min.js?m=1496863874h&ver=4.8-RC2-40878"}};
+			!function(a,b,c){function d(a){var b,c,d,e,f=String.fromCharCode;if(!k||!k.fillText)return!1;switch(k.clearRect(0,0,j.width,j.height),k.textBaseline="top",k.font="600 32px Arial",a){case"flag":return k.fillText(f(55356,56826,55356,56819),0,0),b=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,56826,8203,55356,56819),0,0),c=j.toDataURL(),b===c&&(k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447),0,0),b=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447),0,0),c=j.toDataURL(),b!==c);case"emoji4":return k.fillText(f(55358,56794,8205,9794,65039),0,0),d=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55358,56794,8203,9794,65039),0,0),e=j.toDataURL(),d!==e}return!1}function e(a){var c=b.createElement("script");c.src=a,c.defer=c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i,j=b.createElement("canvas"),k=j.getContext&&j.getContext("2d");for(i=Array("flag","emoji4"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><script src="./Catching circular references in parent-child structures _ sqlsunday.com_files/wp-emoji-release.min.js.download" type="text/javascript" defer=""></script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel="stylesheet" id="all-css-0-1" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource" type="text/css" media="all">
+<link rel="stylesheet" id="hemingway-rewritten-fonts-css" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/css(1)" type="text/css" media="all">
+<link rel="stylesheet" id="all-css-2-1" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource(1)" type="text/css" media="all">
+<link rel="stylesheet" id="print-css-3-1" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/global-print.css" type="text/css" media="print">
+<link rel="stylesheet" id="all-css-4-1" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource(2)" type="text/css" media="all">
+<script type="text/javascript" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource(3)"></script>
+<link rel="stylesheet" id="all-css-0-2" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/style.css" type="text/css" media="all">
+<!--[if lt IE 8]>
+<link rel='stylesheet' id='highlander-comments-ie7-css'  href='https://s1.wp.com/wp-content/mu-plugins/highlander-comments/style-ie7.css?m=1351637563h&#038;ver=20110606' type='text/css' media='all' />
+<![endif]-->
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://dhmacher.wordpress.com/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://s1.wp.com/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="Different query plans for “OR” type queries" href="https://sqlsunday.com/2016/03/23/query-plans-for-or-queries/">
+<link rel="next" title="Last row per group" href="https://sqlsunday.com/2016/04/11/last-row-per-group/">
+<meta name="generator" content="WordPress.com">
+<link rel="canonical" href="https://sqlsunday.com/2016/04/04/catching-circular-references/">
+<link rel="shortlink" href="http://wp.me/p3b6M7-kZ">
+<link rel="alternate" type="application/json+oembed" href="https://public-api.wordpress.com/oembed/?format=json&amp;url=https%3A%2F%2Fsqlsunday.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F&amp;for=wpcom-auto-discovery"><link rel="alternate" type="application/xml+oembed" href="https://public-api.wordpress.com/oembed/?format=xml&amp;url=https%3A%2F%2Fsqlsunday.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F&amp;for=wpcom-auto-discovery">
+<!-- Jetpack Open Graph Tags -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="Catching circular references in parent-child structures">
+<meta property="og:url" content="https://sqlsunday.com/2016/04/04/catching-circular-references/">
+<meta property="og:description" content="A popular form of organizing dimensions is in parent-child structures, also known as “unbalanced” or “ragged” dimensions, because any branch can have an arbitrary number of …">
+<meta property="article:published_time" content="2016-04-04T20:49:05+00:00">
+<meta property="article:modified_time" content="2016-04-04T20:49:05+00:00">
+<meta property="og:site_name" content="sqlsunday.com">
+<meta property="og:image" content="https://dhmacher.files.wordpress.com/2016/04/query.png">
+<meta property="og:image:width" content="679">
+<meta property="og:image:height" content="224">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:site" content="@dhmacher">
+<meta name="twitter:text:title" content="Catching circular references in parent-child structures">
+<meta name="twitter:image" content="https://dhmacher.files.wordpress.com/2016/04/query.png?w=240">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:creator" content="@dhmacher">
+<meta property="article:publisher" content="https://www.facebook.com/WordPresscom">
+<link rel="shortcut icon" type="image/x-icon" href="https://secure.gravatar.com/blavatar/9dcf0d8f380e2cdea3492cc8238f0d1c?s=32" sizes="16x16">
+<link rel="icon" type="image/x-icon" href="https://secure.gravatar.com/blavatar/9dcf0d8f380e2cdea3492cc8238f0d1c?s=32" sizes="16x16">
+<link rel="apple-touch-icon-precomposed" href="https://secure.gravatar.com/blavatar/9dcf0d8f380e2cdea3492cc8238f0d1c?s=114">
+<link rel="openid.server" href="https://dhmacher.wordpress.com/?openidserver=1">
+<link rel="openid.delegate" href="https://dhmacher.wordpress.com/">
+<link rel="search" type="application/opensearchdescription+xml" href="https://sqlsunday.com/osd.xml" title="sqlsunday.com">
+<link rel="search" type="application/opensearchdescription+xml" href="https://s1.wp.com/opensearch.xml" title="WordPress.com">
+<meta name="theme-color" content="#ffffff">
+		<style type="text/css">
+			.recentcomments a {
+				display: inline !important;
+				padding: 0 !important;
+				margin: 0 !important;
+			}
+
+			table.recentcommentsavatartop img.avatar, table.recentcommentsavatarend img.avatar {
+				border: 0px;
+				margin: 0;
+			}
+
+			table.recentcommentsavatartop a, table.recentcommentsavatarend a {
+				border: 0px !important;
+				background-color: transparent !important;
+			}
+
+			td.recentcommentsavatarend, td.recentcommentsavatartop {
+				padding: 0px 0px 1px 0px;
+				margin: 0px;
+			}
+
+			td.recentcommentstextend {
+				border: none !important;
+				padding: 0px 0px 2px 10px;
+			}
+
+			.rtl td.recentcommentstextend {
+				padding: 0px 10px 2px 0px;
+			}
+
+			td.recentcommentstexttop {
+				border: none;
+				padding: 0px 0px 0px 10px;
+			}
+
+			.rtl td.recentcommentstexttop {
+				padding: 0px 10px 0px 0px;
+			}
+		</style>
+		<meta name="application-name" content="sqlsunday.com"><meta name="msapplication-window" content="width=device-width;height=device-height"><meta name="msapplication-tooltip" content="T-SQL programming, useful tips and tutorials for the MS SQL Server developer."><meta name="msapplication-task" content="name=Subscribe;action-uri=https://sqlsunday.com/feed/;icon-uri=https://secure.gravatar.com/blavatar/9dcf0d8f380e2cdea3492cc8238f0d1c?s=16"><meta name="msapplication-task" content="name=Sign up for a free blog;action-uri=http://wordpress.com/signup/;icon-uri=https://s2.wp.com/i/favicon.ico"><meta name="msapplication-task" content="name=WordPress.com Support;action-uri=http://support.wordpress.com/;icon-uri=https://s2.wp.com/i/favicon.ico"><meta name="msapplication-task" content="name=WordPress.com Forums;action-uri=http://forums.wordpress.com/;icon-uri=https://s2.wp.com/i/favicon.ico"><meta name="title" content="Catching circular references in parent-child structures | sqlsunday.com on WordPress.com">
+<meta name="description" content="A popular form of organizing dimensions is in parent-child structures, also known as &quot;unbalanced&quot; or &quot;ragged&quot; dimensions, because any branch can have an arbitrary number of child levels. There are many advantages to this type of representation, but their recursive nature also brings some challenges. In this post, we&#39;re going to look at circular references,…">
+	<style type="text/css">
+			.site-title,
+		.site-description,
+		.site-branding {
+			position: absolute;
+			clip: rect(1px, 1px, 1px, 1px);
+		}
+				.site-header-image {
+			background-image: url(https://dhmacher.files.wordpress.com/2016/11/blog-header-2016-111.jpg);
+		}
+		</style>
+	<link rel="amphtml" href="https://sqlsunday.com/2016/04/04/catching-circular-references/amp/"><style type="text/css" id="syntaxhighlighteranchor"></style>
+<style type="text/css" id="custom-colors-css">.comment-metadata a{color:#6d6d6d}.sep{color:#6d6d6d}th,td{border-color:#ddd}th,td{border-color:rgba(221,221,221,.5)}.format-aside .entry-content,blockquote,pre{background-color:#eee}.format-aside .entry-content,blockquote,pre{background-color:rgba(238,238,238,.2)}input[type="text"],input[type="email"],input[type="url"],input[type="password"],input[type="search"],textareali>article.comment,.hentry,.widget ul li,.widget,.site-main .comment-navigation,.site-main .paging-navigation,.site-main .post-navigation,.comment-list>li:first-child>article.comment:first-child,.page-title{border-color:#eee}input[type="text"],input[type="email"],input[type="url"],input[type="password"],input[type="search"],textareali>article.comment,.hentry,.widget ul li,.widget,.site-main .comment-navigation,.site-main .paging-navigation,.site-main .post-navigation,.comment-list>li:first-child>article.comment:first-child,.page-title{border-color:rgba(238,238,238,.5)}.site-title a,.site-title a:visited{color:#fff}.entry-tags a,.entry-tags a:visited{color:#6d6d6d}.entry-tags a:hover{color:#fff}.featured-image .flag{color:#fff}.site-footer button,.site-footer input[type="button"],.site-footer input[type="reset"],.site-footer input[type="submit"],.widget_search .search-submit{color:#fff}.site-footer button:hover,.site-footer input[type="button"]:hover,.site-footer input[type="reset"]:hover,.site-footer input[type="submit"]:hover,.widget_search .search-submit:hover{color:#fff}button:hover,input[type="button"]:hover,input[type="reset"]:hover,input[type="submit"]:hover{color:#fff}#header-search .search-submit{color:#fff}address{background-color:#f1f1f1}address{background-color:rgba(241,241,241,.2)}.entry-content table tbody>tr:nth-child(odd)>td{background-color:#f9f9f9}.entry-content table tbody>tr:nth-child(odd)>td{background-color:rgba(249,249,249,.2)}blockquote{color:#000}.entry-title,.entry-title a,.entry-title a:visited,.comments-title{color:#2d2d2d}.format-quote .entry-content{background-color:#262626}.format-quote .entry-content{background-color:rgba(38,38,38,.2)}body,button,input,textarea{color:#444}.widget-title,th{color:#444}.comment-author a,.comment-author a:visited{color:#444}mark,ins{color:#444}.widget{color:#555}.jetpack-recipe{border-color:#666}.jetpack-recipe{border-color:rgba(102,102,102,.3)}blockquote cite{color:#666}.entry-tags a,.entry-tags a:visited{background-color:#767676}.entry-tags a,.entry-tags a:visited{background-color:rgba(118,118,118,.4)}.entry-tags a:after{border-right-color:#767676}.entry-tags a:after{border-right-color:rgba(118,118,118,.4)}.entry-categories:before{color:#6d6d6d}.wp-caption-text{color:#6d6d6d}.entry-meta,.entry-meta a,.entry-meta a:visited,.page-title,.no-comments{color:#6d6d6d}body,#infinite-footer .container,.entry-tags a:before{background-color:#fff}.site-footer button,.site-footer input[type="button"],.site-footer input[type="reset"],.site-footer input[type="submit"],.widget_search .search-submit{background-color:#9f2023}button:hover,input[type="button"]:hover,input[type="reset"]:hover,input[type="submit"]:hover{background-color:#9f2023}.widget_search .search-submit{border-color:#9f2023}.site-footer button:hover,.site-footer input[type="button"]:hover,.site-footer input[type="reset"]:hover,.site-footer input[type="submit"]:hover,.widget_search .search-submit:hover{background-color:#721718}.widget_search .search-submit:hover{border-color:#721718}.featured-image .flag{background-color:#9f2023}.jetpack-recipe-title{border-color:#9f2023}.entry-tags a:hover{background-color:#9f2023}.entry-tags a:hover:after{border-right-color:#9f2023}#header-search .search-submit{border-color:#9f2023}#header-search .search-submit{background-color:#9f2023}#header-search .search-submit:hover{background-color:#721718}#header-search .search-submit:hover{border-color:#721718}a,a:visited,a:hover,a:focus,a:active,.entry-title a:hover{color:#9f2023}.site-title a:hover,.site-title a:focus{color:#df6668}.site-footer a,.site-footer a:visited,.site-footer a:hover,.site-footer a:focus,.site-footer a:active{color:#df6668}.widget-areas a,.widget-areas a:visited,.widget-areas a:hover,.widget-areas a:focus,.widget-areas a:active{color:#df6668}</style>
+		<link rel="stylesheet" id="custom-css-css" type="text/css" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource(4)">
+		<script charset="utf-8" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/rate.php"></script><style type="text/css"></style><link rel="stylesheet" type="text/css" id="gravatar-card-css" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/hovercard.css"><style type="text/css">.tk-raleway{font-family:"raleway-1","raleway-2",sans-serif;}</style><style type="text/css">@font-face{font-family:raleway-1;src:url(https://use.typekit.net/af/821960/000000000000000000014968/27/l?subset_id=2&fvd=n6&v=3) format("woff2"),url(https://use.typekit.net/af/821960/000000000000000000014968/27/d?subset_id=2&fvd=n6&v=3) format("woff"),url(https://use.typekit.net/af/821960/000000000000000000014968/27/a?subset_id=2&fvd=n6&v=3) format("opentype");font-weight:600;font-style:normal;}</style><link rel="stylesheet" type="text/css" id="gravatar-card-services-css" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/services.css"><style type="text/css" id="pd_popup_holder_style_6615732_post_1301">#pd_popup_holder_6615732_post_1301 { position:absolute; display:none; width:350px; height:auto; top:0px; left:0px; z-index:10000; border:solid 1px #CCC; background-color:white; padding:0px 15px;font-family:Arial,Sans;box-shadow: -10px 10px 20px rgba(0, 0, 0, .5);-webkit-box-shadow: 0px 0px 6px rgba(0, 0, 0, .25);-moz-box-shadow: 0px 0px 6px rgba(0, 0, 0, .25); }</style></head>
+
+<body class="post-template-default single single-post postid-1301 single-format-standard mp6 customizer-styles-applied highlander-enabled highlander-light custom-colors">
+<div id="page" class="hfeed site">
+
+	<header id="masthead" class="site-header" role="banner">
+		<div class="site-header-image" style="bottom: -133.333px;">
+			<div class="site-branding-wrapper" style="opacity: 0.0610329;">
+				<div class="site-branding">
+					<h1 class="site-title"><a href="https://sqlsunday.com/" rel="home">sqlsunday.com</a></h1>
+					<h2 class="site-description">T-SQL programming, useful tips and tutorials for the MS SQL Server developer.</h2>
+				</div>
+			</div>
+		</div>
+	</header><!-- #masthead -->
+	<nav id="site-navigation" class="main-navigation clear" role="navigation">
+		<h1 class="menu-toggle" title="Menu"><span class="screen-reader-text">Menu</span></h1>
+		<a class="skip-link screen-reader-text" href="https://sqlsunday.com/2016/04/04/catching-circular-references/#content">Skip to content</a>
+
+		<div class="menu-menu-bar-container"><ul id="menu-menu-bar" class="menu nav-menu"><li id="menu-item-86" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-86"><a href="https://sqlsunday.com/about-sqlsunday/">About sqlsunday.com</a></li>
+<li id="menu-item-1237" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-1237"><a href="https://strd.co/">Structured Concepts</a></li>
+<li id="menu-item-1446" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1446"><a href="https://sqlsunday.com/slack-app/">Slack app</a></li>
+<li id="menu-item-1128" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1128"><a href="https://sqlsunday.com/downloads/">Downloads</a></li>
+<li id="menu-item-1901" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-has-children menu-item-1901"><a href="https://sqlsunday.com/">Checklists</a>
+<ul class="sub-menu">
+	<li id="menu-item-1903" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1903"><a href="https://sqlsunday.com/installing-sql-server-2014/">Installing SQL Server 2014</a></li>
+	<li id="menu-item-1902" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1902"><a href="https://sqlsunday.com/installing-sql-server-2016/">Installing SQL Server 2016</a></li>
+</ul>
+</li>
+</ul></div>		<div id="header-search-toggle">
+			<span class="screen-reader-text">Search</span>
+		</div>
+		<div id="header-search">
+			<form role="search" method="get" class="search-form" action="https://sqlsunday.com/">
+				<label>
+					<span class="screen-reader-text">Search for:</span>
+					<input type="search" class="search-field" placeholder="Search …" value="" name="s">
+				</label>
+				<input type="submit" class="search-submit" value="Search">
+			</form>		</div>
+	</nav><!-- #site-navigation -->
+	<div id="content" class="site-content">
+
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main" role="main">
+
+					
+			
+<article id="post-1301" class="post-1301 post type-post status-publish format-standard hentry category-advanced category-t-sql tag-circular-reference tag-common-table-expression tag-maxrecursion tag-msg-530 tag-parent-child tag-recursion tag-recursive">
+	<header class="entry-header">
+					<h1 class="entry-title">Catching circular references in parent-child&nbsp;structures</h1>				<div class="entry-meta">
+			<span class="posted-on"><a href="https://sqlsunday.com/2016/04/04/catching-circular-references/" rel="bookmark"><time class="entry-date published" datetime="2016-04-04T22:49:05+00:00">2016-04-04</time></a></span><span class="byline"><span class="sep"> / </span><span class="author vcard"><a class="url fn n" href="https://sqlsunday.com/author/dhmacher/">Daniel Hutmacher</a></span></span>					</div><!-- .entry-meta -->
+	</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		<p>A popular form of organizing dimensions is in <a href="https://sqlsunday.com/2014/01/26/traversing-parent-child-relations/">parent-child structures</a>, also known as “unbalanced” or “ragged” dimensions, because any branch can have an arbitrary number of child levels. There are many advantages to this type of representation, but their recursive nature also brings some challenges. In this post, we’re going to look at <strong>circular references,</strong> and how you can trap them before they run out of control.</p>
+<p><span id="more-1301"></span></p>
+<p>Suppose you have a tree hierarchy where (among other members) “3” is the parent of “8”, “8” is the parent of “B” and “B” is the parent of “E”. You could easily draw this as a branch structure where the members could be profit centers of a company, divisions of government, managers and employees, product lines, cell references in an Excel sheet or pretty much anything that can be described as a hierarchy.</p>
+<pre>3
+--8
+  --B
+    --E</pre>
+<p>Now, if we say that “E” is the parent of “3”, we’ve created a <em>circular</em> reference, and we end up with an infinite recursion. What that means is that if you follow the tree from the root to the leaf level, you’ll end up going round and round in circles. In terms of a database query, that means that the query will go on forever until it either fills up your log file or tempdb, or until the maximum number of recursions (<a href="https://sqlsunday.com/2013/02/17/recursive-cte/">OPTION MAXRECURSION</a>) is reached, whichever happens first.</p>
+<p>The error message will look something like this:</p>
+<pre><span style="color:#ff0000;">Msg 530, Level 16, State 1, Line 1</span>
+<span style="color:#ff0000;">The statement terminated. The maximum recursion 100 has been exhausted before statement completion.</span></pre>
+<p>And that’s not a problem – you could trap this error using a <a href="https://sqlsunday.com/2014/04/13/error-handling-using-try-catch/">TRY-CATCH</a> block, but that won’t show you the <em>actual</em> circular reference in your table that you need to fix for your fancy hierarchy to work.</p>
+<h2>Some test data</h2>
+<p>Let’s create a temp table with some 14 000 rows in a parent-child structure.</p>
+<pre>CREATE TABLE #table (
+&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; int NOT NULL,
+&nbsp;&nbsp;&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; varchar(10) NOT NULL,
+&nbsp;&nbsp;&nbsp; parent&nbsp;&nbsp;&nbsp; int NULL,
+&nbsp;&nbsp;&nbsp; PRIMARY KEY CLUSTERED (id)
+);
+
+CREATE UNIQUE INDEX IX_table_parent
+    ON #table (parent, id)
+    INCLUDE (name);
+
+<span style="color:#008000;">--- Add 14 000 rows to the table:</span>
+INSERT INTO #table (id, name, parent)
+SELECT x.n+v.id, v.name, x.n+v.parent
+FROM (
+&nbsp;&nbsp; &nbsp;SELECT TOP (999)
+           100000*ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+&nbsp;&nbsp; &nbsp;FROM sys.columns
+    ) AS x
+CROSS JOIN (
+&nbsp;&nbsp; &nbsp;VALUES (1,&nbsp; '1', NULL), (2,&nbsp; '2', 1),
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (3,&nbsp; '3', 14),&nbsp;&nbsp; (4,&nbsp; '4', 1),
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (5,&nbsp; '5', 2),&nbsp;&nbsp;&nbsp; (6,&nbsp; '6', 2),
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (7,&nbsp; '7', 3),&nbsp;&nbsp;&nbsp; (8,&nbsp; '8', 3),
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (9,&nbsp; '9', 5),&nbsp;&nbsp;&nbsp; (10, 'A', 7),
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (11, 'B', 8),&nbsp;&nbsp;&nbsp; (12, 'C', 9),
+&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; (13, 'D', 10),&nbsp;&nbsp; (14, 'E', 11)
+    ) AS v(id, name, parent);
+
+<span style="color:#008000;">--- Intentionally create a circular reference:</span>
+UPDATE #table SET parent=700014 WHERE id=700003;</pre>
+<h2>Finding the recursion</h2>
+<p>If you’re new to recursive common table expressions, this next part is not going to make any sense at all to you, so go ahead and <a href="https://sqlsunday.com/2013/02/17/recursive-cte/">read up on that</a> first.</p>
+<p>The plan for our query is simple enough. Start with an anchor row (any row can be an anchor), and from that row, find its children, their children, etc until we either reach the leaf level – or until we get back to the anchor again. If we reach the leaf level, all is fine. If we come back to the anchor, we’ve found a circular reference. Then we’ll want to have a trail of “breadcrumbs”, a path, of how we got there.</p>
+<p>Break any one of those links in that path, and you’ve resolved the circular reference.</p>
+<p>Let’s look at all the pieces one at a time.</p>
+<h3>The anchor</h3>
+<pre>&nbsp;&nbsp;&nbsp; SELECT parent AS start_id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CAST(name AS varchar(max)) AS [path]
+&nbsp;&nbsp;&nbsp; FROM #table</pre>
+<p>Every row is a potential anchor. In this result set, we have three columns. The “start_id” is the id of the anchor row, which we’ll keep throughout the recursion. Whenever our recursion returns to “start_id”, we’ve found a circular reference.</p>
+<p>“id” is the current row of the recursion. It starts as the child of “start_id”, then its grandchild, great grandchild, and so on.</p>
+<p>“path” is a textual representation, our trail of breadcrumbs. This will be used to show a human reader how a potential circular reference happened.</p>
+<h3>The recursion</h3>
+<pre>&nbsp;&nbsp;&nbsp; SELECT rcte.start_id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t.id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CAST(rcte.[path]+' -&gt; '+t.name AS varchar(max)) AS [path]
+&nbsp;&nbsp;&nbsp; FROM rcte
+&nbsp;&nbsp;&nbsp; INNER JOIN #table AS t ON
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t.parent=rcte.id
+&nbsp;&nbsp;&nbsp; WHERE rcte.start_id!=rcte.id</pre>
+<p>The recursion finds all children of “id”, thereby traversing the tree towards the leaf level. “start_id” stays the same (it’s our anchor), “id” is the new child row, and we’re adding plaintext breadcrumbs to the end of the “path” column.</p>
+<p>This recursion will end when there are no more children available, which means that we’ve reached the leaf level.</p>
+<p>But we also need it to stop if we were to find a circular reference, and that’s why we’ve added that last WHERE clause. When “id” is “start_id”, we’ve gone full circle, and it’s time to pull on the brakes.</p>
+<h3>The complete solution</h3>
+<p>Putting it all together, here’s the final product:</p>
+<pre>WITH rcte AS (
+<span style="color:#008000;">&nbsp;&nbsp; &nbsp;--- Anchor: any row in #table could be an anchor</span>
+<span style="color:#008000;">&nbsp;&nbsp; &nbsp;--- in an infinite recursion.</span>
+&nbsp;&nbsp;&nbsp; SELECT parent AS start_id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CAST(name AS varchar(max)) AS [path]
+&nbsp;&nbsp;&nbsp; FROM #table
+
+&nbsp;&nbsp;&nbsp; UNION ALL
+
+<span style="color:#008000;">&nbsp;&nbsp; &nbsp;--- Find children. Keep this up until we circle back</span>
+<span style="color:#008000;">&nbsp;&nbsp; &nbsp;--- to the anchor row, which we keep in the "start_id"</span>
+<span style="color:#008000;">&nbsp;&nbsp; &nbsp;--- column.</span>
+&nbsp;&nbsp;&nbsp; SELECT rcte.start_id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t.id,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CAST(rcte.[path]+' -&gt; '+t.name AS varchar(max)) AS [path]
+&nbsp;&nbsp;&nbsp; FROM rcte
+&nbsp;&nbsp;&nbsp; INNER JOIN #table AS t ON
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t.parent=rcte.id
+&nbsp;&nbsp;&nbsp; WHERE rcte.start_id!=rcte.id)
+
+SELECT start_id, [path]
+FROM rcte
+WHERE start_id=id
+OPTION (MAXRECURSION 0);&nbsp;&nbsp;&nbsp; <span style="color:#008000;">-- eliminates "assert" operator.</span></pre>
+<p>That MAXRECURSION hint is there to simplify the plan. You trust me, right?</p>
+<p>Here’s the output from the sample data.</p>
+<pre>start_id&nbsp;&nbsp; &nbsp;path
+----------  --------------------
+700014&nbsp;&nbsp;   &nbsp;3 -&gt; 8 -&gt; B -&gt; E
+700011&nbsp;&nbsp;   &nbsp;E -&gt; 3 -&gt; 8 -&gt; B
+700008&nbsp;&nbsp;   &nbsp;B -&gt; E -&gt; 3 -&gt; 8
+700003&nbsp;&nbsp;   &nbsp;8 -&gt; B -&gt; E -&gt; 3</pre>
+<p>You may notice that it’s actually the same recursion, represented in four different ways. You could argue that this is by design, or you could spend time trying to eliminate the “duplicates” of the chain.</p>
+<h2>The query plan</h2>
+<p>Thanks to some optimal indexing, we’ve found a very efficient plan, with <em>zero</em> memory grant and no <a href="https://sqlsunday.com/2014/06/15/blocking-aggregate-operators/">blocking operators</a>.</p>
+<p><img data-attachment-id="1302" data-permalink="https://sqlsunday.com/2016/04/04/catching-circular-references/query/" data-orig-file="https://dhmacher.files.wordpress.com/2016/04/query.png?w=676&amp;h=223" data-orig-size="679,224" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Finding circular references" data-image-description="" data-medium-file="https://dhmacher.files.wordpress.com/2016/04/query.png?w=676&amp;h=223?w=300" data-large-file="https://dhmacher.files.wordpress.com/2016/04/query.png?w=676&amp;h=223?w=676" class="alignnone size-full wp-image-1302" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/query.png" alt="Finding circular references" width="676" height="223" srcset="https://dhmacher.files.wordpress.com/2016/04/query.png?w=676&amp;h=223 676w, https://dhmacher.files.wordpress.com/2016/04/query.png?w=150&amp;h=49 150w, https://dhmacher.files.wordpress.com/2016/04/query.png?w=300&amp;h=99 300w, https://dhmacher.files.wordpress.com/2016/04/query.png 679w" sizes="(max-width: 676px) 100vw, 676px"></p>
+<p>Here’s how to read the plan: For the sake of brevity, you can completely ignore the Compute Scalar operators, which are just scalar operations like string parsing, incrementing counters, etc.</p>
+<p><img data-attachment-id="1303" data-permalink="https://sqlsunday.com/2016/04/04/catching-circular-references/query-detailed/" data-orig-file="https://dhmacher.files.wordpress.com/2016/04/query-detailed.png?w=676&amp;h=256" data-orig-size="679,257" data-comments-opened="1" data-image-meta="{&quot;aperture&quot;:&quot;0&quot;,&quot;credit&quot;:&quot;&quot;,&quot;camera&quot;:&quot;&quot;,&quot;caption&quot;:&quot;&quot;,&quot;created_timestamp&quot;:&quot;0&quot;,&quot;copyright&quot;:&quot;&quot;,&quot;focal_length&quot;:&quot;0&quot;,&quot;iso&quot;:&quot;0&quot;,&quot;shutter_speed&quot;:&quot;0&quot;,&quot;title&quot;:&quot;&quot;,&quot;orientation&quot;:&quot;0&quot;}" data-image-title="Finding circular references, detailed" data-image-description="" data-medium-file="https://dhmacher.files.wordpress.com/2016/04/query-detailed.png?w=676&amp;h=256?w=300" data-large-file="https://dhmacher.files.wordpress.com/2016/04/query-detailed.png?w=676&amp;h=256?w=676" class="alignnone size-full wp-image-1303" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/query-detailed.png" alt="Finding circular references, detailed" width="676" height="256" srcset="https://dhmacher.files.wordpress.com/2016/04/query-detailed.png?w=676&amp;h=256 676w, https://dhmacher.files.wordpress.com/2016/04/query-detailed.png?w=150&amp;h=57 150w, https://dhmacher.files.wordpress.com/2016/04/query-detailed.png?w=300&amp;h=114 300w, https://dhmacher.files.wordpress.com/2016/04/query-detailed.png 679w" sizes="(max-width: 676px) 100vw, 676px"></p>
+<p><span style="color:#ff0000;"><strong>I</strong></span>: The Index scan collects all the anchors of the query. The anchor rows move left in the diagram until they’re stored in an <a href="https://sqlsunday.com/2014/01/05/about-spool-operator/">Index Spool</a>, which is kind of an internal high-performance temp table.</p>
+<p><span style="color:#ff0000;"><strong>II</strong></span>: The rows that were just stored in the Spool are then retrieved, and joined…</p>
+<p><span style="color:#ff0000;"><strong>III</strong></span>: … using an Index Seek (finding rows that are <em>children</em> of each row from <span style="color:#ff0000;"><strong>II</strong></span>). The filter operator then makes sure to eliminates rows where “start_id” is equal to “id” (corresponding to the WHERE clause in the recursive part).</p>
+<p>This whole process generates even more rows that are moved into the Index Spool, and the process repeats itself over and over, until there are no more recursions. Finally, the top-left Filter operator isolates only rows where “id” <em>equals</em> “start_id”, so we only see just the circular references we’re looking for.</p>
+<h3>Indexing</h3>
+<p>Making a recursive query like this run smoothly relies on an index on (parent_id, id). This allows the Nested Loop operator in the recursive part of the CTE to issue an <strong>Index Seek</strong> on all rows with a specific “parent_id”, rather than having to scan through the entire table looking for matching children.</p>
+<p>Remember that Nested Loop Join means that anything that happens “below” the operator in the graphical plan is performed <em>once for each row</em>, so performance here is key.</p>
+<div id="jp-post-flair" class="sharedaddy sd-rating-enabled sd-like-enabled sd-sharing-enabled"><div class="sd-block sd-rating"><h3 class="sd-title">Rate this:</h3><div class="pd-rating" id="pd_rating_holder_6615732_post_1301" style="display: inline-block;"><div class="rating-icons" id="pd_rate_6615732_post_1301" style="float:left;"><div class="rating-star-icon" onmouseout="PDRTJS_6615732_post_1301.rebuild();" onclick="PDRTJS_6615732_post_1301.rate(1);" onmouseover="PDRTJS_6615732_post_1301.hover(1);" id="PDRTJS_6615732_post_1301_stars_1" style="background-size: 32px 48px !important; cursor: pointer; width: 16px; height: 16px; line-height: 16px; background: url(https://polldaddy.com/images/ratings/star-yellow-sml.png) top left; float: left; padding: 0px; margin: 0px; margin-right: 1px;">&nbsp;</div><div class="rating-star-icon" onmouseout="PDRTJS_6615732_post_1301.rebuild();" onclick="PDRTJS_6615732_post_1301.rate(2);" onmouseover="PDRTJS_6615732_post_1301.hover(2);" id="PDRTJS_6615732_post_1301_stars_2" style="background-size: 32px 48px !important; cursor: pointer; width: 16px; height: 16px; line-height: 16px; background: url(https://polldaddy.com/images/ratings/star-yellow-sml.png) top left; float: left; padding: 0px; margin: 0px; margin-right: 1px;">&nbsp;</div><div class="rating-star-icon" onmouseout="PDRTJS_6615732_post_1301.rebuild();" onclick="PDRTJS_6615732_post_1301.rate(3);" onmouseover="PDRTJS_6615732_post_1301.hover(3);" id="PDRTJS_6615732_post_1301_stars_3" style="background-size: 32px 48px !important; cursor: pointer; width: 16px; height: 16px; line-height: 16px; background: url(https://polldaddy.com/images/ratings/star-yellow-sml.png) top left; float: left; padding: 0px; margin: 0px; margin-right: 1px;">&nbsp;</div><div class="rating-star-icon" onmouseout="PDRTJS_6615732_post_1301.rebuild();" onclick="PDRTJS_6615732_post_1301.rate(4);" onmouseover="PDRTJS_6615732_post_1301.hover(4);" id="PDRTJS_6615732_post_1301_stars_4" style="background-size: 32px 48px !important; cursor: pointer; width: 16px; height: 16px; line-height: 16px; background: url(https://polldaddy.com/images/ratings/star-yellow-sml.png) top left; float: left; padding: 0px; margin: 0px; margin-right: 1px;">&nbsp;</div><div class="rating-star-icon" onmouseout="PDRTJS_6615732_post_1301.rebuild();" onclick="PDRTJS_6615732_post_1301.rate(5);" onmouseover="PDRTJS_6615732_post_1301.hover(5);" id="PDRTJS_6615732_post_1301_stars_5" style="background-size: 32px 48px !important; cursor: pointer; width: 16px; height: 16px; line-height: 16px; background: url(https://polldaddy.com/images/ratings/star-yellow-sml.png) center left; float: left; padding: 0px; margin: 0px; margin-right: 1px;">&nbsp;</div></div><span style="float:left;">&nbsp;</span><div id="rating_info_6615732_post_1301" style="display:block;float:left;background:url(https://polldaddy.com/images/ratings/info.png) no-repeat 3px 2px;width:16px;height:16px;cursor:pointer; null " onclick="javascript:PDRTJS_6615732_post_1301.togglePopup();return false;"><span style="display:none;">i</span></div><div class="pd_popup_holder" id="pd_popup_holder_6615732_post_1301">&nbsp;</div><div class="rating-msg" id="PDRTJS_6615732_post_1301_msg" style="float:left; padding-left: 5px; text-align: left; font:normal normal /16px ; color: #;">6 Votes</div><p style="padding: 0px; margin: 0px; clear: both;"></p></div></div><div class="sharedaddy sd-sharing-enabled"><div class="robots-nocontent sd-block sd-social sd-social-icon-text sd-sharing"><h3 class="sd-title">Share:</h3><div class="sd-content"><ul><li class="share-email share-service-visible"><a rel="nofollow" data-shared="" class="share-email sd-button share-icon" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?share=email&amp;nb=1" target="_blank" title="Click to email"><span>Email</span></a></li><li class="share-twitter"><a rel="nofollow" data-shared="sharing-twitter-1301" class="share-twitter sd-button share-icon" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?share=twitter&amp;nb=1" target="_blank" title="Click to share on Twitter"><span>Twitter</span></a></li><li class="share-facebook"><a rel="nofollow" data-shared="sharing-facebook-1301" class="share-facebook sd-button share-icon" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?share=facebook&amp;nb=1" target="_blank" title="Share on Facebook"><span>Facebook</span></a></li><li class="share-google-plus-1"><a rel="nofollow" data-shared="sharing-google-1301" class="share-google-plus-1 sd-button share-icon" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?share=google-plus-1&amp;nb=1" target="_blank" title="Click to share on Google+"><span>Google</span></a></li><li class="share-linkedin"><a rel="nofollow" data-shared="sharing-linkedin-1301" class="share-linkedin sd-button share-icon" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?share=linkedin&amp;nb=1" target="_blank" title="Click to share on LinkedIn"><span>LinkedIn<span class="share-count">5</span></span></a></li><li class="share-print"><a rel="nofollow" data-shared="" class="share-print sd-button share-icon" href="https://sqlsunday.com/2016/04/04/catching-circular-references/#print" target="_blank" title="Click to print"><span>Print</span></a></li><li class="share-reddit"><a rel="nofollow" data-shared="" class="share-reddit sd-button share-icon" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?share=reddit&amp;nb=1" target="_blank" title="Click to share on Reddit"><span>Reddit</span></a></li><li class="share-end"></li></ul></div></div></div><div class="sharedaddy sd-block sd-like jetpack-likes-widget-wrapper jetpack-likes-widget-loaded" id="like-post-wrapper-46976663-1301-594a264eb61e0" data-src="//widgets.wp.com/likes/#blog_id=46976663&amp;post_id=1301&amp;origin=dhmacher.wordpress.com&amp;obj_id=46976663-1301-594a264eb61e0" data-name="like-post-frame-46976663-1301-594a264eb61e0"><h3 class="sd-title">Like this:</h3><div class="likes-widget-placeholder post-likes-widget-placeholder" style="height: 55px; display: none;"><span class="button"><span>Like</span></span> <span class="loading">Loading...</span></div><iframe class="post-likes-widget jetpack-likes-widget" name="like-post-frame-46976663-1301-594a264eb61e0" height="55px" width="100%" frameborder="0" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource.html"></iframe><span class="sd-text-color"></span><a class="sd-link-color"></a></div></div>			</div><!-- .entry-content -->
+
+	<footer class="entry-meta">
+						<div class="entry-categories">
+					<a href="https://sqlsunday.com/category/by-difficulty/advanced/" rel="category tag">Advanced</a>, <a href="https://sqlsunday.com/category/t-sql/" rel="category tag">T-SQL</a>				</div>
+					<div class="entry-tags"><a href="https://sqlsunday.com/tag/circular-reference/" rel="tag">circular reference</a>, <a href="https://sqlsunday.com/tag/common-table-expression/" rel="tag">common table expression</a>, <a href="https://sqlsunday.com/tag/maxrecursion/" rel="tag">maxrecursion</a>, <a href="https://sqlsunday.com/tag/msg-530/" rel="tag">msg 530</a>, <a href="https://sqlsunday.com/tag/parent-child/" rel="tag">parent-child</a>, <a href="https://sqlsunday.com/tag/recursion/" rel="tag">recursion</a>, <a href="https://sqlsunday.com/tag/recursive/" rel="tag">recursive</a></div>	</footer><!-- .entry-meta -->
+</article><!-- #post-## -->
+
+				<nav class="navigation post-navigation" role="navigation">
+		<h1 class="screen-reader-text">Post navigation</h1>
+		<div class="nav-links">
+			<div class="nav-previous"><a href="https://sqlsunday.com/2016/03/23/query-plans-for-or-queries/" rel="prev"><span class="meta-nav">←</span> Different query plans for “OR” type&nbsp;queries</a></div><div class="nav-next"><a href="https://sqlsunday.com/2016/04/11/last-row-per-group/" rel="next">Last row per&nbsp;group <span class="meta-nav">→</span></a></div>		</div><!-- .nav-links -->
+	</nav><!-- .navigation -->
+	
+			
+<div id="comments" class="comments-area">
+
+	
+			<h2 class="comments-title">
+			6 thoughts on “<span>Catching circular references in parent-child&nbsp;structures</span>”		</h2>
+
+		
+		<ol class="comment-list">
+				<li class="post pingback">
+		<p>Pingback: <a href="http://curatedsql.com/2016/04/05/circular-references/" rel="external nofollow" class="url">Circular References – Curated SQL</a></p>
+	</li><!-- #comment-## -->
+	<li class="comment even thread-even depth-1 highlander-comment" id="li-comment-1671">
+		<article id="comment-1671" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt="" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/b54c5a839222bd0b5e38ae5aac566fdc" class="avatar avatar-60 grav-hashed grav-hijack" height="60" width="60" id="grav-b54c5a839222bd0b5e38ae5aac566fdc-0">					<cite class="fn">Joe Celko</cite>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta comment-metadata">
+					<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-1671"><time pubdate="" datetime="2016-04-11T19:16:39+00:00">
+					2016-04-11 at 19:16					</time></a>
+				</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>I really do not like this approach. It is called an adjacency list model and its how non-SQL programmers model their old pointer chain programming in SQL when their first learning.</p>
+<p>The design is nonrelational, has to be traversed (SQL is a declarative language. We do not do traversals) and it eats up an awful lot of resources. Another problem of course is that it is flawed in your example, all of the nodes in the tree are distinct. Now consider a parts explosion of a 747 airplane were number five machine screws appear in literally hundreds of places.</p>
+<p>Unfortunately the DDL you posted is not a table! It has no key and you did not even bother with a check constraint to prevent apparent from being its own child. This is very poor design.</p>
+<p>If you look up the nested set model for hierarchies you get a correct design. The nested set model separates the nodes from the structure (remember the first day of ER modeling? Entities and their relationships appear in separate tables). </p>
+<p>You can literally use declarative constraints to prevent any cycles in your data.</p>
+</div>
+
+			<div class="comment-actions">
+				<a rel="nofollow" class="comment-reply-link" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?replytocom=1671#respond" onclick="return addComment.moveForm( &quot;comment-1671&quot;, &quot;1671&quot;, &quot;respond&quot;, &quot;1301&quot; )" aria-label="Reply to Joe Celko">Reply</a>							</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-dhmacher bypostauthor odd alt depth-2 highlander-comment" id="li-comment-1672">
+		<article id="comment-1672" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt="" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/5b19e405dd32bdbcca78a8da9f3968eb" class="avatar avatar-60 grav-hashed grav-hijack" height="60" width="60" id="grav-5b19e405dd32bdbcca78a8da9f3968eb-0">					<cite class="fn"><a href="http://sqlsunday.com/" rel="external nofollow" class="url">Daniel Hutmacher</a></cite>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta comment-metadata">
+					<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-1672"><time pubdate="" datetime="2016-04-11T19:35:31+00:00">
+					2016-04-11 at 19:35					</time></a>
+				</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Hi, Joe! Thanks for your feedback.</p>
+<p>The DDL is, in my humble opinion, indeed a table, and it does have a primary key. Unfortunately, it’s not possible to create foreign key constraints on temp tables, and even if I did create check constraints and/or a self-referencing FK on the table, I still don’t see how to purely declaratively prevent circular references.</p>
+<p>Remember that I’m designing a solution to <em>display</em> circular references (for troubleshooting purposes, for instance), not necessarily to just prevent them.</p>
+<p>I would love your thoughts on how to improve the solution.</p>
+</div>
+
+			<div class="comment-actions">
+				<a rel="nofollow" class="comment-reply-link" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?replytocom=1672#respond" onclick="return addComment.moveForm( &quot;comment-1672&quot;, &quot;1672&quot;, &quot;respond&quot;, &quot;1301&quot; )" aria-label="Reply to Daniel Hutmacher">Reply</a>							</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+	<li class="comment even thread-odd thread-alt depth-1 highlander-comment" id="li-comment-1673">
+		<article id="comment-1673" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt="" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/b54c5a839222bd0b5e38ae5aac566fdc" class="avatar avatar-60 grav-hashed grav-hijack" height="60" width="60" id="grav-b54c5a839222bd0b5e38ae5aac566fdc-1">					<cite class="fn">Joe Celko</cite>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta comment-metadata">
+					<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-1673"><time pubdate="" datetime="2016-04-13T01:33:48+00:00">
+					2016-04-13 at 01:33					</time></a>
+				</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>No you do not have a key. The key is, by definition, a subset of attributes of the entity being modeled in the table. Your vague generic physical role locator is an integer; an integer is a numeric data type; numeric datatypes are used for quantities and magnitudes. They are not used for identifiers. What you are doing is faking a pointer in 1960’s assembly language program. Furthermore, the rest of your columns are wrong. There is no such thing as a “generic name” in RDBMS; this model of data is based on the laws of logic in the first law of logic is the law of identity. To be is to be something in particular, to be nothing in particular or everything in general is to be nothing at all. Remember that from your freshman logic class? </p>
+<p>Then the parent node should be the same data type as the child node. The role of parent or child does not completely change the nature of a node. But in your world, the parents node becomes a magnitude or quantity. Think about how insane that is. Your unique index is simply a bad attempt to somehow fix an incredibly bad design.</p>
+<p>CREATE TABLE Generic_Tree<br>
+(vague_generic_physical_row_locator INTEGER NOT NULL PRIMARY KEY,<br>
+ node_name VARCHAR(10) NOT NULL,<br>
+ parent_node_vague_generic_physical_row_locator INTEGER);</p>
+<p>REATE UNIQUE INDEX Fake_Key<br>
+    ON Generic_Tree(vague_generic_physical_row_locator_)<br>
+    INCLUDE (node_name);</p>
+<p>&gt;&gt;  I still don’t see how to purely declaratively prevent circular references.&lt; 0),<br>
+ rgt iNTEGER NOT NULL UNIQUE<br>
+   CHECK (rgt &gt; 1),<br>
+ CHECK (lft &lt; rgt),<br>
+UNIQUE (lft, rgt));</p>
+<p>See how the combination of left and right constraints keep everything nested? The unique (lft, rgt) constraint could be the primary key, if you are hierarchy is essentially a fancy coordinate system in a two dimensional space. But otherwise the node name could be the primary key. If this is a personnel model in which everyone is unique and holds only one position in the hierarchy.</p>
+<p>Since everything can be done with between predicates, the indexing makes this run extremely fast. Furthermore, by separating the nodes from the data structure (relationship), we get a very small compact table to search they can be they can have a covering index.</p>
+<p>You might want to get my book on trees and hierarchies in SQL.</p>
+</div>
+
+			<div class="comment-actions">
+				<a rel="nofollow" class="comment-reply-link" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?replytocom=1673#respond" onclick="return addComment.moveForm( &quot;comment-1673&quot;, &quot;1673&quot;, &quot;respond&quot;, &quot;1301&quot; )" aria-label="Reply to Joe Celko">Reply</a>							</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+	<li class="comment odd alt thread-even depth-1 highlander-comment" id="li-comment-1837">
+		<article id="comment-1837" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt="" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/b54c5a839222bd0b5e38ae5aac566fdc" class="avatar avatar-60 grav-hashed grav-hijack" height="60" width="60" id="grav-b54c5a839222bd0b5e38ae5aac566fdc-2">					<cite class="fn">Joe Celko</cite>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta comment-metadata">
+					<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-1837"><time pubdate="" datetime="2016-11-03T15:04:21+00:00">
+					2016-11-03 at 15:04					</time></a>
+				</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>A bit of graph theory here. One of the properties a tree is that the number of edges equals the number of nodes -1 or E= (N-1).</p>
+<p>This is actually pretty easy to write in SQL, but you have to remember to remove the possibility that a node can be its own parent simple check constraint. Imagine a graph made up of four nodes; three of them are connected in the triangle and the fourth node sits by itself with no edge at all. It would still meet this condition. Very quickly, here is the code:</p>
+<p>CREATE TABLE Adjaceny_List<br>
+(node_name CHAR(1) NOT NULL PRIMARY KEY,<br>
+ parent_node_name CHAR(1),<br>
+ CHECK (node_name CHAR(1)  parent_node_name));</p>
+<p>INSERT INTO Adjaceny_List<br>
+VALUES<br>
+  (‘1’, NULL),<br>
+  (‘2’, ‘1’),<br>
+  (‘3’, ‘E’),<br>
+  (‘4’, ‘1’),<br>
+  (‘5’, ‘2’),<br>
+  (‘6’, ‘2’),<br>
+  (‘7’, ‘3’),<br>
+  (‘8’, ‘3’),<br>
+  (‘9’, ‘5’),<br>
+  (‘A’, ‘7’),<br>
+  (‘B’, ‘8’),<br>
+  (‘C’, ‘9’),<br>
+  (‘D’, ‘A’),<br>
+  (‘E’, ‘B’);</p>
+<p>SELECT COUNT(*) AS edge_cnt FROM Adjaceny_List ;</p>
+<p>SELECT COUNT(*)AS node_cnt<br>
+  FROM (SELECT node_name<br>
+          FROM Adjaceny_List<br>
+        UNION<br>
+        SELECT parent_node_name<br>
+          FROM Adjaceny_List) AS X(node_name); </p>
+<p>edge_cnt = 14;<br>
+node_cnt = 15</p>
+</div>
+
+			<div class="comment-actions">
+				<a rel="nofollow" class="comment-reply-link" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?replytocom=1837#respond" onclick="return addComment.moveForm( &quot;comment-1837&quot;, &quot;1837&quot;, &quot;respond&quot;, &quot;1301&quot; )" aria-label="Reply to Joe Celko">Reply</a>							</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	<ul class="children">
+	<li class="comment byuser comment-author-dhmacher bypostauthor even depth-2 highlander-comment" id="li-comment-1838">
+		<article id="comment-1838" class="comment">
+			<footer>
+				<div class="comment-author vcard">
+					<img alt="" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/5b19e405dd32bdbcca78a8da9f3968eb" class="avatar avatar-60 grav-hashed grav-hijack" height="60" width="60" id="grav-5b19e405dd32bdbcca78a8da9f3968eb-1">					<cite class="fn"><a href="http://sqlsunday.com/" rel="external nofollow" class="url">Daniel Hutmacher</a></cite>				</div><!-- .comment-author .vcard -->
+				
+				<div class="comment-meta comment-metadata">
+					<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-1838"><time pubdate="" datetime="2016-11-03T15:43:49+00:00">
+					2016-11-03 at 15:43					</time></a>
+				</div><!-- .comment-meta .commentmetadata -->
+			</footer>
+
+			<div class="comment-content"><p>Thanks!</p>
+</div>
+
+			<div class="comment-actions">
+				<a rel="nofollow" class="comment-reply-link" href="https://sqlsunday.com/2016/04/04/catching-circular-references/?replytocom=1838#respond" onclick="return addComment.moveForm( &quot;comment-1838&quot;, &quot;1838&quot;, &quot;respond&quot;, &quot;1301&quot; )" aria-label="Reply to Daniel Hutmacher">Reply</a>							</div><!-- .reply -->
+		</article><!-- #comment-## -->
+
+	</li><!-- #comment-## -->
+</ul><!-- .children -->
+</li><!-- #comment-## -->
+		</ol><!-- .comment-list -->
+
+		
+	
+	
+		<div id="respond" class="comment-respond js">
+		<h3 id="reply-title" class="comment-reply-title">Let me hear your thoughts! <small><a rel="nofollow" id="cancel-comment-reply-link" href="https://sqlsunday.com/2016/04/04/catching-circular-references/#respond" style="display:none;">Cancel reply</a></small></h3>			<form action="https://sqlsunday.com/wp-comments-post.php" method="post" id="commentform" class="comment-form" novalidate="">
+				<input type="hidden" id="highlander_comment_nonce" name="highlander_comment_nonce" value="74b5c526c6"><input type="hidden" name="_wp_http_referer" value="/2016/04/04/catching-circular-references/">
+<input type="hidden" name="hc_post_as" id="hc_post_as" value="guest">
+
+<div class="comment-form-field comment-textarea">
+	
+	<div id="comment-form-comment"><textarea tabindex="-1" style="position: absolute; top: -999px; left: 0px; right: auto; bottom: auto; border: 0px; padding: 0px; box-sizing: content-box; word-wrap: break-word; overflow: hidden; transition: none; height: 0px !important; min-height: 0px !important; font-family: &quot;Helvetica Neue&quot;, Arial; font-size: 14px; font-weight: 400; font-style: normal; letter-spacing: 0px; text-transform: none; text-decoration: none solid rgba(0, 0, 0, 0.7); word-spacing: 0px; text-indent: 0px; line-height: 23.8px; width: 654px;" class="autosizejs "></textarea><textarea id="comment" name="comment" title="Enter your comment here..." placeholder="Enter your comment here..." style="height: 125px; overflow: hidden; word-wrap: break-word; resize: none;"></textarea></div>
+</div>
+
+<div id="comment-form-identity" style="display: none;">
+
+	<div id="comment-form-nascar">
+		<p>Fill in your details below or click an icon to log in:</p>
+		<ul>
+			<li class="selected" style="display:none;">
+				<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-form-guest" id="postas-guest" title="Guest">
+					<span></span>
+				</a>
+			</li>
+			<li>
+				<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-form-load-service:WordPress.com" id="postas-wordpress" title="WordPress.com">
+					<span></span>
+				</a>
+			</li>
+			<li>
+				<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-form-load-service:Twitter" id="postas-twitter" title="Twitter">
+					<span></span>
+				</a>
+			</li>
+			<li>
+				<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#comment-form-load-service:Facebook" id="postas-facebook" title="Facebook">
+					<span></span>
+				</a>
+			</li>
+			<li>
+		</li></ul>
+	</div>
+
+	<div id="comment-form-guest" class="comment-form-service selected">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+<a href="https://gravatar.com/site/signup/" target="_blank">				<img src="./Catching circular references in parent-child structures _ sqlsunday.com_files/ad516503a11cd5ca435acc9bb6523536" alt="Gravatar" width="25" class="no-grav">
+</a>			</div>
+
+				<div class="comment-form-fields">
+				<div class="comment-form-field comment-form-email">
+					<label for="email">Email <span class="required">(required)</span> <span class="nopublish">(Address never made public)</span></label>
+					<div class="comment-form-input"><input id="email" name="email" type="email" value=""></div>
+				</div>
+				<div class="comment-form-field comment-form-author">
+					<label for="author">Name <span class="required">(required)</span></label>
+					<div class="comment-form-input"><input id="author" name="author" type="text" value=""></div>
+				</div>
+				<div class="comment-form-field comment-form-url">
+					<label for="url">Website</label>
+					<div class="comment-form-input"><input id="url" name="url" type="url" value=""></div>
+				</div>
+			</div>
+	
+		</div>
+	</div>
+
+	<div id="comment-form-wordpress" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="./Catching circular references in parent-child structures _ sqlsunday.com_files/ad516503a11cd5ca435acc9bb6523536" alt="WordPress.com Logo" width="25" class="no-grav">
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="wp_avatar" id="wordpress-avatar" class="comment-meta-wordpress" value="">
+				<input type="hidden" name="wp_user_id" id="wordpress-user_id" class="comment-meta-wordpress" value="">
+				<input type="hidden" name="wp_access_token" id="wordpress-access_token" class="comment-meta-wordpress" value="">
+				<p class="comment-form-posting-as pa-wordpress"><strong></strong> You are commenting using your WordPress.com account. <span class="comment-form-log-out">(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( &#39;wordpress&#39; );">Log&nbsp;Out</a>&nbsp;/&nbsp;<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#" onclick="javascript:HighlanderComments.switchAccount();return false;">Change</a>&nbsp;)</span></p>
+			</div>
+	
+		</div>
+	</div>
+
+	<div id="comment-form-twitter" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="./Catching circular references in parent-child structures _ sqlsunday.com_files/ad516503a11cd5ca435acc9bb6523536" alt="Twitter picture" width="25" class="no-grav">
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="twitter_avatar" id="twitter-avatar" class="comment-meta-twitter" value="">
+				<input type="hidden" name="twitter_user_id" id="twitter-user_id" class="comment-meta-twitter" value="">
+				<input type="hidden" name="twitter_access_token" id="twitter-access_token" class="comment-meta-twitter" value="">
+				<p class="comment-form-posting-as pa-twitter"><strong></strong> You are commenting using your Twitter account. <span class="comment-form-log-out">(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( &#39;twitter&#39; );">Log&nbsp;Out</a>&nbsp;/&nbsp;<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#" onclick="javascript:HighlanderComments.switchAccount();return false;">Change</a>&nbsp;)</span></p>
+			</div>
+	
+		</div>
+	</div>
+
+	<div id="comment-form-facebook" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="./Catching circular references in parent-child structures _ sqlsunday.com_files/ad516503a11cd5ca435acc9bb6523536" alt="Facebook photo" width="25" class="no-grav">
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="fb_avatar" id="facebook-avatar" class="comment-meta-facebook" value="">
+				<input type="hidden" name="fb_user_id" id="facebook-user_id" class="comment-meta-facebook" value="">
+				<input type="hidden" name="fb_access_token" id="facebook-access_token" class="comment-meta-facebook" value="">
+				<p class="comment-form-posting-as pa-facebook"><strong></strong> You are commenting using your Facebook account. <span class="comment-form-log-out">(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( &#39;facebook&#39; );">Log&nbsp;Out</a>&nbsp;/&nbsp;<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#" onclick="javascript:HighlanderComments.switchAccount();return false;">Change</a>&nbsp;)</span></p>
+			</div>
+	
+		</div>
+	</div>
+
+	<div id="comment-form-googleplus" class="comment-form-service">
+		<div class="comment-form-padder">
+			<div class="comment-form-avatar">
+				<img src="./Catching circular references in parent-child structures _ sqlsunday.com_files/ad516503a11cd5ca435acc9bb6523536" alt="Google+ photo" width="25" class="no-grav">
+			</div>
+
+				<div class="comment-form-fields">
+				<input type="hidden" name="googleplus_avatar" id="googleplus-avatar" class="comment-meta-googleplus" value="">
+				<input type="hidden" name="googleplus_user_id" id="googleplus-user_id" class="comment-meta-googleplus" value="">
+				<input type="hidden" name="googleplus_access_token" id="googleplus-access_token" class="comment-meta-googleplus" value="">
+				<p class="comment-form-posting-as pa-googleplus"><strong></strong> You are commenting using your Google+ account. <span class="comment-form-log-out">(&nbsp;<a href="javascript:HighlanderComments.doExternalLogout( &#39;googleplus&#39; );">Log&nbsp;Out</a>&nbsp;/&nbsp;<a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#" onclick="javascript:HighlanderComments.switchAccount();return false;">Change</a>&nbsp;)</span></p>
+			</div>
+	
+		</div>
+	</div>
+
+
+	<div id="comment-form-load-service" class="comment-form-service">
+		<div class="comment-form-posting-as-cancel"><a href="javascript:HighlanderComments.cancelExternalWindow();">Cancel</a></div>
+		<p>Connecting to %s</p>
+	</div>
+
+</div>
+
+<script type="text/javascript">
+var highlander_expando_javascript = function(){
+	var input = document.createElement( 'input' ),
+	    comment = jQuery( '#comment' );
+
+	if ( 'placeholder' in input ) {
+		comment.attr( 'placeholder', jQuery( '.comment-textarea label' ).remove().text() );
+	}
+
+	// Expando Mode: start small, then auto-resize on first click + text length
+	jQuery( '#comment-form-identity' ).hide();
+	jQuery( '#comment-form-subscribe' ).hide();
+	jQuery( '#commentform .form-submit' ).hide();
+
+	comment.css( { 'height':'10px' } ).one( 'focus', function() {
+		var timer = setInterval( HighlanderComments.resizeCallback, 10 )
+		jQuery( this ).animate( { 'height': HighlanderComments.initialHeight } ).delay( 100 ).queue( function(n) { clearInterval( timer ); HighlanderComments.resizeCallback(); n(); } );
+		jQuery( '#comment-form-identity' ).slideDown();
+		jQuery( '#comment-form-subscribe' ).slideDown();
+		jQuery( '#commentform .form-submit' ).slideDown();
+	});
+}
+jQuery(document).ready( highlander_expando_javascript );
+</script>
+
+<div id="comment-form-subscribe" style="display: none;">
+	<p class="comment-subscription-form"><input type="checkbox" name="subscribe" id="subscribe" value="subscribe" style="width: auto;"> <label class="subscribe-label" id="subscribe-label" for="subscribe" style="display: inline;">Notify me of new comments via email.</label></p><p class="post-subscription-form"><input type="checkbox" name="subscribe_blog" id="subscribe_blog" value="subscribe" style="width: auto;"> <label class="subscribe-label" id="subscribe-blog-label" for="subscribe_blog" style="display: inline;">Notify me of new posts via email.</label></p></div>
+
+
+
+
+<p class="form-submit" style="display: none;"><input name="submit" type="submit" id="comment-submit" class="submit" value="Post Comment"> <input type="hidden" name="comment_post_ID" value="1301" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p><p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="469403b0f6"></p>
+<input type="hidden" name="genseq" value="1498031694">
+<p style="display: none;"></p>			<input type="hidden" id="ak_js" name="ak_js" value="1498031694825"></form>
+			</div><!-- #respond -->
+	<div style="clear: both"></div>
+</div><!-- #comments -->
+
+		
+		</main><!-- #main -->
+	</div><!-- #primary -->
+
+
+	<div id="secondary" class="widget-area" role="complementary">
+		<aside id="categories-3" class="widget widget_categories"><h1 class="widget-title">Categories</h1>		<ul>
+	<li class="cat-item cat-item-85127075"><a href="https://sqlsunday.com/category/by-difficulty/">By difficulty</a> (153)
+<ul class="children">
+	<li class="cat-item cat-item-63898"><a href="https://sqlsunday.com/category/by-difficulty/advanced/">Advanced</a> (34)
+</li>
+	<li class="cat-item cat-item-8516"><a href="https://sqlsunday.com/category/by-difficulty/basics/">Basics</a> (42)
+</li>
+	<li class="cat-item cat-item-63897"><a href="https://sqlsunday.com/category/by-difficulty/intermediate/">Intermediate</a> (79)
+</li>
+</ul>
+</li>
+	<li class="cat-item cat-item-514761"><a href="https://sqlsunday.com/category/clr/">CLR</a> (1)
+</li>
+	<li class="cat-item cat-item-1184"><a href="https://sqlsunday.com/category/off-topic/">Off-topic</a> (4)
+</li>
+	<li class="cat-item cat-item-287"><a href="https://sqlsunday.com/category/rant/">Rant</a> (3)
+</li>
+	<li class="cat-item cat-item-2347"><a href="https://sqlsunday.com/category/series/">Series</a> (24)
+<ul class="children">
+	<li class="cat-item cat-item-200330738"><a href="https://sqlsunday.com/category/series/efficient-data/">Efficient data</a> (7)
+</li>
+	<li class="cat-item cat-item-47331963"><a href="https://sqlsunday.com/category/series/introduction-to-t-sql/">Introduction to T-SQL</a> (1)
+</li>
+	<li class="cat-item cat-item-3823792"><a href="https://sqlsunday.com/category/series/slowly-changing-dimensions/">Slowly changing dimensions</a> (5)
+</li>
+	<li class="cat-item cat-item-8092845"><a href="https://sqlsunday.com/category/series/sql-server-security/">SQL Server security</a> (11)
+</li>
+</ul>
+</li>
+	<li class="cat-item cat-item-28850970"><a href="https://sqlsunday.com/category/sql-server-concepts/">SQL Server concepts</a> (66)
+</li>
+	<li class="cat-item cat-item-31191"><a href="https://sqlsunday.com/category/t-sql/">T-SQL</a> (109)
+</li>
+	<li class="cat-item cat-item-1788"><a href="https://sqlsunday.com/category/tips/">Tips</a> (39)
+</li>
+	<li class="cat-item cat-item-1"><a href="https://sqlsunday.com/category/uncategorized/">Uncategorized</a> (1)
+</li>
+	<li class="cat-item cat-item-1149"><a href="https://sqlsunday.com/category/videos/">Videos</a> (2)
+</li>
+		</ul>
+</aside><aside id="search-3" class="widget widget_search"><h1 class="widget-title">Search for articles</h1><form role="search" method="get" class="search-form" action="https://sqlsunday.com/">
+				<label>
+					<span class="screen-reader-text">Search for:</span>
+					<input type="search" class="search-field" placeholder="Search …" value="" name="s">
+				</label>
+				<input type="submit" class="search-submit" value="Search">
+			</form></aside>	</div><!-- #secondary -->
+
+	</div><!-- #content -->
+	<footer id="colophon" class="site-footer" role="contentinfo">
+				<div class="site-info">
+			<a href="https://wordpress.com/?ref=footer_custom_svg" title="Create a website or blog at WordPress.com"><svg style="fill: currentColor; position: relative; top: 1px;" width="14px" height="15px" viewBox="0 0 14 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-labelledby="title" role="img">
+				<title id="title">Create a website or blog at WordPress.com</title>
+				<path d="M12.5225848,4.97949746 C13.0138466,5.87586309 13.2934037,6.90452431 13.2934037,7.99874074 C13.2934037,10.3205803 12.0351007,12.3476807 10.1640538,13.4385638 L12.0862862,7.88081544 C12.4453251,6.98296834 12.5648813,6.26504621 12.5648813,5.62667922 C12.5648813,5.39497674 12.549622,5.17994084 12.5225848,4.97949746 L12.5225848,4.97949746 Z M7.86730089,5.04801561 C8.24619178,5.02808979 8.58760099,4.98823815 8.58760099,4.98823815 C8.9267139,4.94809022 8.88671369,4.44972248 8.54745263,4.46957423 C8.54745263,4.46957423 7.52803983,4.54957381 6.86996227,4.54957381 C6.25158863,4.54957381 5.21247202,4.46957423 5.21247202,4.46957423 C4.87306282,4.44972248 4.83328483,4.96816418 5.17254589,4.98823815 C5.17254589,4.98823815 5.49358462,5.02808979 5.83269753,5.04801561 L6.81314716,7.73459399 L5.43565839,11.8651647 L3.14394256,5.04801561 C3.52312975,5.02808979 3.86416859,4.98823815 3.86416859,4.98823815 C4.20305928,4.94809022 4.16305906,4.44972248 3.82394616,4.46957423 C3.82394616,4.46957423 2.80475558,4.54957381 2.14660395,4.54957381 C2.02852925,4.54957381 1.88934333,4.54668493 1.74156477,4.54194422 C2.86690406,2.83350881 4.80113651,1.70529256 6.99996296,1.70529256 C8.638342,1.70529256 10.1302017,2.33173369 11.2498373,3.35765419 C11.222726,3.35602457 11.1962815,3.35261718 11.1683554,3.35261718 C10.5501299,3.35261718 10.1114609,3.89113285 10.1114609,4.46957423 C10.1114609,4.98823815 10.4107217,5.42705065 10.7296864,5.94564049 C10.969021,6.36482346 11.248578,6.90326506 11.248578,7.68133501 C11.248578,8.21992476 11.0413918,8.84503256 10.7696866,9.71584277 L10.1417574,11.8132391 L7.86730089,5.04801561 Z M6.99996296,14.2927074 C6.38218192,14.2927074 5.78595654,14.2021153 5.22195356,14.0362644 L7.11048207,8.54925635 L9.04486267,13.8491542 C9.05760348,13.8802652 9.07323319,13.9089317 9.08989995,13.9358945 C8.43574834,14.1661896 7.73285573,14.2927074 6.99996296,14.2927074 L6.99996296,14.2927074 Z M0.706448182,7.99874074 C0.706448182,7.08630113 0.902152921,6.22015756 1.25141403,5.43749503 L4.25357806,13.6627848 C2.15393732,12.6427902 0.706448182,10.4898387 0.706448182,7.99874074 L0.706448182,7.99874074 Z M6.99996296,0.999 C3.14016476,0.999 0,4.13905746 0,7.99874074 C0,11.8585722 3.14016476,14.999 6.99996296,14.999 C10.8596871,14.999 14,11.8585722 14,7.99874074 C14,4.13905746 10.8596871,0.999 6.99996296,0.999 L6.99996296,0.999 Z" id="wordpress-logo-simplified-cmyk" stroke="none" fill="“currentColor”" fill-rule="evenodd"></path>
+			</svg></a>
+			
+					</div><!-- .site-info -->
+	</footer><!-- #colophon -->
+</div><!-- #page -->
+
+<!--  -->
+<script type="text/javascript" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/gprofiles.js.download"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var WPGroHo = {"my_hash":""};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/wpgroho.js.download"></script>
+
+	<script>
+		//initialize and attach hovercards to all gravatars
+		jQuery( document ).ready( function( $ ) {
+
+			if (typeof Gravatar === "undefined"){
+				return;
+			}
+
+			if ( typeof Gravatar.init !== "function" ) {
+				return;
+			}			
+
+			Gravatar.profile_cb = function( hash, id ) {
+				WPGroHo.syncProfileData( hash, id );
+			};
+			Gravatar.my_hash = WPGroHo.my_hash;
+			Gravatar.init( 'body', '#wp-admin-bar-my-account' );
+		});
+	</script>
+
+		<div style="display:none">
+	<div class="grofile-hash-map-b54c5a839222bd0b5e38ae5aac566fdc">
+	</div>
+	<div class="grofile-hash-map-5b19e405dd32bdbcca78a8da9f3968eb">
+	</div>
+	</div>
+<script type="text/javascript">
+/* <![CDATA[ */
+var HighlanderComments = {"loggingInText":"Logging In\u2026","submittingText":"Posting Comment\u2026","postCommentText":"Post Comment","connectingToText":"Connecting to %s","commentingAsText":"%1$s: You are commenting using your %2$s account.","logoutText":"Log Out","loginText":"Log In","connectURL":"https:\/\/dhmacher.wordpress.com\/public.api\/connect\/?action=request","logoutURL":"https:\/\/dhmacher.wordpress.com\/wp-login.php?action=logout&_wpnonce=eabaffcd31","homeURL":"https:\/\/sqlsunday.com\/","postID":"1301","gravDefault":"mystery","enterACommentError":"Please enter a comment","enterEmailError":"Please enter your email address here","invalidEmailError":"Invalid email address","enterAuthorError":"Please enter your name here","gravatarFromEmail":"This picture will show whenever you leave a comment. Click to customize it.","logInToExternalAccount":"Log in to use details from one of these accounts.","change":"Change","changeAccount":"Change Account","comment_registration":"","userIsLoggedIn":"","isJetpack":"0","text_direction":"ltr"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource(5)"></script>
+
+	<div id="carousel-reblog-box">
+		<form action="https://sqlsunday.com/2016/04/04/catching-circular-references/#" name="carousel-reblog">
+			<textarea id="carousel-reblog-content" name="carousel-reblog-content" placeholder="Add your thoughts here... (optional)"></textarea>
+			<label for="carousel-reblog-to-blog-id" id="carousel-reblog-lblogid">Post to</label>
+			<select name="carousel-reblog-to-blog-id" id="carousel-reblog-to-blog-id">
+						</select>
+
+			<div class="submit">
+				<span class="canceltext"><a href="https://sqlsunday.com/2016/04/04/catching-circular-references/#" class="cancel">Cancel</a></span>
+				<input type="submit" name="carousel-reblog-submit" class="button" id="carousel-reblog-submit" value="Reblog Post">
+				<input type="hidden" id="carousel-reblog-blog-id" value="46976663">
+				<input type="hidden" id="carousel-reblog-blog-url" value="https://sqlsunday.com">
+				<input type="hidden" id="carousel-reblog-blog-title" value="sqlsunday.com">
+				<input type="hidden" id="carousel-reblog-post-url" value="">
+				<input type="hidden" id="carousel-reblog-post-title" value="">
+			</div>
+
+			<input type="hidden" id="_wpnonce" name="_wpnonce" value="d22c4a322a"><input type="hidden" name="_wp_http_referer" value="/2016/04/04/catching-circular-references/">		</form>
+
+		<div class="arrow"></div>
+	</div>
+<script type="text/javascript" charset="UTF-8" id="polldaddyRatings"><!--//--><![CDATA[//><!--
+PDRTJS_settings_6615732_post_1301={"id":6615732,"unique_id":"wp-post-1301","title":"Catching%20circular%20references%20in%20parent-child%26nbsp%3Bstructures","permalink":"https:\/\/sqlsunday.com\/2016\/04\/04\/catching-circular-references\/","item_id":"_post_1301"}; if ( typeof PDRTJS_RATING !== 'undefined' ){if ( typeof PDRTJS_6615732_post_1301 == 'undefined' ){PDRTJS_6615732_post_1301 = new PDRTJS_RATING( PDRTJS_settings_6615732_post_1301 );}}
+//--><!]]></script><script type="text/javascript" charset="UTF-8" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/rating.js.download"></script>
+	<script type="text/javascript">
+		window.WPCOM_sharing_counts = {"https:\/\/sqlsunday.com\/2016\/04\/04\/catching-circular-references\/":1301};
+	</script>
+	
+		<script type="text/javascript">
+			var windowOpen;
+		jQuery(document).on( 'ready post-load', function(){
+			jQuery( 'a.share-twitter' ).on( 'click', function() {
+				if ( 'undefined' !== typeof windowOpen ){ // If there's another sharing window open, close it.
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery(this).attr( 'href' ), 'wpcomtwitter', 'menubar=1,resizable=1,width=600,height=350' );
+				return false;
+			});
+		});
+		</script>
+				<script type="text/javascript">
+			var windowOpen;
+		jQuery(document).on( 'ready post-load', function(){
+			jQuery( 'a.share-facebook' ).on( 'click', function() {
+				if ( 'undefined' !== typeof windowOpen ){ // If there's another sharing window open, close it.
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery(this).attr( 'href' ), 'wpcomfacebook', 'menubar=1,resizable=1,width=600,height=400' );
+				return false;
+			});
+		});
+		</script>
+				<script type="text/javascript">
+			var windowOpen;
+		jQuery(document).on( 'ready post-load', function(){
+			jQuery( 'a.share-google-plus-1' ).on( 'click', function() {
+				if ( 'undefined' !== typeof windowOpen ){ // If there's another sharing window open, close it.
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery(this).attr( 'href' ), 'wpcomgoogle-plus-1', 'menubar=1,resizable=1,width=480,height=550' );
+				return false;
+			});
+		});
+		</script>
+				<script type="text/javascript">
+			var windowOpen;
+		jQuery(document).on( 'ready post-load', function(){
+			jQuery( 'a.share-linkedin' ).on( 'click', function() {
+				if ( 'undefined' !== typeof windowOpen ){ // If there's another sharing window open, close it.
+					windowOpen.close();
+				}
+				windowOpen = window.open( jQuery(this).attr( 'href' ), 'wpcomlinkedin', 'menubar=1,resizable=1,width=580,height=450' );
+				return false;
+			});
+		});
+		</script>
+		<script type="text/javascript" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/form.js.download"></script>
+<link rel="stylesheet" id="all-css-0-3" href="./Catching circular references in parent-child structures _ sqlsunday.com_files/jetpack-carousel.css" type="text/css" media="all">
+<!--[if lte IE 8]>
+<link rel='stylesheet' id='jetpack-carousel-ie8fix-css'  href='https://s1.wp.com/wp-content/mu-plugins/carousel/jetpack-carousel-ie8fix.css?m=1412618825h&#038;ver=20121024' type='text/css' media='all' />
+<![endif]-->
+<script type="text/javascript">
+/* <![CDATA[ */
+var actionbardata = {"siteID":"46976663","siteName":"sqlsunday.com","siteURL":"https:\/\/sqlsunday.com","icon":"<img alt='' src='https:\/\/secure.gravatar.com\/blavatar\/9dcf0d8f380e2cdea3492cc8238f0d1c?s=50&d=https%3A%2F%2Fs1.wp.com%2Fi%2Flogo%2Fwpcom-gray-white.png' class='avatar avatar-50' height='50' width='50' \/>","canManageOptions":"","canCustomizeSite":"","isFollowing":"","themeSlug":"pub\/hemingway-rewritten","signupURL":"https:\/\/wordpress.com\/start\/","loginURL":"https:\/\/dhmacher.wordpress.com\/wp-login.php?redirect_to=https%3A%2F%2Fsqlsunday.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F","themeURL":"https:\/\/wordpress.com\/theme\/hemingway-rewritten\/","xhrURL":"https:\/\/sqlsunday.com\/wp-admin\/admin-ajax.php","nonce":"f70b816d94","isSingular":"1","isFolded":"","isLoggedIn":"","isMobile":"","subscribeNonce":"<input type=\"hidden\" id=\"_wpnonce\" name=\"_wpnonce\" value=\"da0ab54135\" \/>","referer":"https:\/\/sqlsunday.com\/2016\/04\/04\/catching-circular-references\/","canFollow":"1","statusMessage":"","customizeLink":"https:\/\/dhmacher.wordpress.com\/wp-admin\/customize.php?url=https%3A%2F%2Fdhmacher.wordpress.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F","postID":"1301","shortlink":"http:\/\/wp.me\/p3b6M7-kZ","canEditPost":"","editLink":"https:\/\/wordpress.com\/post\/sqlsunday.com\/1301","statsLink":"https:\/\/wordpress.com\/stats\/post\/1301\/sqlsunday.com","i18n":{"view":"View site","follow":"Follow","following":"Following","edit":"Edit","login":"Log in","signup":"Sign up","customize":"Customize","report":"Report this content","themeInfo":"Get theme: Hemingway Rewritten","shortlink":"Copy shortlink","copied":"Copied","followedText":"New posts from this site will now appear in your <a href=\"https:\/\/wordpress.com\/\">Reader<\/a>","foldBar":"Collapse this bar","unfoldBar":"Expand this bar","editSubs":"Manage subscriptions","viewReader":"View site in the Reader","subscribe":"Sign me up","enterEmail":"Enter your email address","followers":"Join 282 other followers","alreadyUser":"Already have a WordPress.com account? <a href=\"https:\/\/dhmacher.wordpress.com\/wp-login.php?redirect_to=https%3A%2F%2Fsqlsunday.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F\">Log in now.<\/a>","stats":"Stats"}};
+/* ]]> */
+</script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var jetpackCarouselStrings = {"widths":[370,700,1000,1200,1400,2000],"is_logged_in":"","lang":"en","ajaxurl":"https:\/\/sqlsunday.com\/wp-admin\/admin-ajax.php","nonce":"8e61f16c9c","display_exif":"1","display_geo":"1","single_image_gallery":"1","single_image_gallery_media_file":"","background_color":"black","comment":"Comment","post_comment":"Post Comment","write_comment":"Write a Comment...","loading_comments":"Loading Comments...","download_original":"View full size <span class=\"photo-size\">{0}<span class=\"photo-size-times\">\u00d7<\/span>{1}<\/span>","no_comment_text":"Please be sure to submit some text with your comment.","no_comment_email":"Please provide an email address to comment.","no_comment_author":"Please provide your name to comment.","comment_post_error":"Sorry, but there was an error posting your comment. Please try again later.","comment_approved":"Your comment was approved.","comment_unapproved":"Your comment is in moderation.","camera":"Camera","aperture":"Aperture","shutter_speed":"Shutter Speed","focal_length":"Focal Length","comment_registration":"0","require_name_email":"1","login_url":"https:\/\/dhmacher.wordpress.com\/wp-login.php?redirect_to=https%3A%2F%2Fsqlsunday.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F","blog_id":"46976663","local_comments_commenting_as":"<fieldset><label for=\"email\">Email (Required)<\/label> <input type=\"text\" name=\"email\" class=\"jp-carousel-comment-form-field jp-carousel-comment-form-text-field\" id=\"jp-carousel-comment-form-email-field\" \/><\/fieldset><fieldset><label for=\"author\">Name (Required)<\/label> <input type=\"text\" name=\"author\" class=\"jp-carousel-comment-form-field jp-carousel-comment-form-text-field\" id=\"jp-carousel-comment-form-author-field\" \/><\/fieldset><fieldset><label for=\"url\">Website<\/label> <input type=\"text\" name=\"url\" class=\"jp-carousel-comment-form-field jp-carousel-comment-form-text-field\" id=\"jp-carousel-comment-form-url-field\" \/><\/fieldset>","reblog":"Reblog","reblogged":"Reblogged","reblog_add_thoughts":"Add your thoughts here... (optional)","reblogging":"Reblogging...","post_reblog":"Post Reblog","stats_query_args":"blog=46976663&v=wpcom&tz=2&user_id=0&subd=dhmacher","is_public":"1","reblog_enabled":""};
+/* ]]> */
+</script>
+<script type="text/javascript">
+/* <![CDATA[ */
+var sharing_js_options = {"lang":"en","counts":"1"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/saved_resource(6)"></script><div id="actionbar" class="actnbr-pub-hemingway-rewritten actnbr-has-follow"><ul><li class="actnbr-btn actnbr-hidden"> 			    	<a class="actnbr-action actnbr-actn-follow" href="https://sqlsunday.com/2016/04/04/catching-circular-references/"><svg class="gridicon gridicon__follow" height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 16v2h-3v3h-2v-3h-3v-2h3v-3h2v3h3zM20 2v9h-4v3h-3v4H4c-1.1 0-2-.9-2-2V2h18zM8 13v-1H4v1h4zm3-3H4v1h7v-1zm0-2H4v1h7V8zm7-4H4v2h14V4z"></path></g></svg><span>Follow</span></a> 			    	<div class="actnbr-popover tip tip-top-left actnbr-notice"> 			    		<div class="tip-arrow"></div> 			    		<div class="tip-inner actnbr-follow-bubble"></div> 			    	</div> 			    </li><li class="actnbr-ellipsis actnbr-hidden"> 			  <svg class="gridicon gridicon__ellipsis" height="24" width="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><circle cx="5" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle></g></svg> 			  <div class="actnbr-popover tip tip-top-left actnbr-more"> 			  	<div class="tip-arrow"></div> 			  	<div class="tip-inner"> 				  <ul> 				    <li class="actnbr-sitename actnbr-hidden"><a href="https://sqlsunday.com/"><img alt="" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/9dcf0d8f380e2cdea3492cc8238f0d1c" class="avatar avatar-50" height="50" width="50"> sqlsunday.com</a></li> 				   	<li class="actnbr-folded-customize actnbr-hidden"><a href="https://dhmacher.wordpress.com/wp-admin/customize.php?url=https%3A%2F%2Fdhmacher.wordpress.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F"><svg class="gridicon gridicon__customize" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M2 6c0-1.505.78-3.08 2-4 0 .845.69 2 2 2 1.657 0 3 1.343 3 3 0 .386-.08.752-.212 1.09.74.594 1.476 1.19 2.19 1.81L8.9 11.98c-.62-.716-1.214-1.454-1.807-2.192C6.753 9.92 6.387 10 6 10c-2.21 0-4-1.79-4-4zm12.152 6.848l1.34-1.34c.607.304 1.283.492 2.008.492 2.485 0 4.5-2.015 4.5-4.5 0-.725-.188-1.4-.493-2.007L18 9l-2-2 3.507-3.507C18.9 3.188 18.225 3 17.5 3 15.015 3 13 5.015 13 7.5c0 .725.188 1.4.493 2.007L3 20l2 2 6.848-6.848c1.885 1.928 3.874 3.753 5.977 5.45l1.425 1.148 1.5-1.5-1.15-1.425c-1.695-2.103-3.52-4.092-5.448-5.977z" data-reactid=".2.1.1:0.1b.0"></path></g></svg><span>Customize<span></span></span></a></li> 				    <li class="actnbr-folded-follow actnbr-hidden"><a class="actnbr-action actnbr-actn-follow" href="https://sqlsunday.com/2016/04/04/catching-circular-references/"><svg class="gridicon gridicon__follow" height="24px" width="24px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M23 16v2h-3v3h-2v-3h-3v-2h3v-3h2v3h3zM20 2v9h-4v3h-3v4H4c-1.1 0-2-.9-2-2V2h18zM8 13v-1H4v1h4zm3-3H4v1h7v-1zm0-2H4v1h7V8zm7-4H4v2h14V4z"></path></g></svg><span>Follow</span></a></li> 					<li class="actnbr-signup actnbr-hidden"><a href="https://wordpress.com/start/">Sign up</a></li> 				    <li class="actnbr-login actnbr-hidden"><a href="https://dhmacher.wordpress.com/wp-login.php?redirect_to=https%3A%2F%2Fsqlsunday.com%2F2016%2F04%2F04%2Fcatching-circular-references%2F">Log in</a></li> 				     				    <li class="actnbr-shortlink actnbr-hidden"><a href="http://wp.me/p3b6M7-kZ">Copy shortlink</a></li> 				    <li class="flb-report actnbr-hidden"><a href="http://en.wordpress.com/abuse/">Report this content</a></li> 				     				     				    <li class="actnbr-subs actnbr-hidden"><a href="https://subscribe.wordpress.com/">Manage subscriptions</a></li> 				    <li class="actnbr-fold actnbr-hidden"><a href="https://sqlsunday.com/2016/04/04/catching-circular-references/">Collapse this bar</a></li> 			      </ul> 			    </div> 		      </div> 		    </li> 	      </ul></div>
+<script type="text/javascript">
+// <![CDATA[
+(function() {
+try{
+  if ( window.external &&'msIsSiteMode' in window.external) {
+    if (window.external.msIsSiteMode()) {
+      var jl = document.createElement('script');
+      jl.type='text/javascript';
+      jl.async=true;
+      jl.src='/wp-content/plugins/ie-sitemode/custom-jumplist.php';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(jl, s);
+    }
+  }
+}catch(e){}
+})();
+// ]]>
+</script>		<iframe src="./Catching circular references in parent-child structures _ sqlsunday.com_files/master.html" scrolling="no" id="likes-master" name="likes-master" style="display:none;"></iframe>
+		<div id="likes-other-gravatars"><div class="likes-text"><span>%d</span> bloggers like this:</div><ul class="wpl-avatars sd-like-gravatars"></ul></div>
+		<script>
+			var _comscore = _comscore || [];
+			_comscore.push({
+				c1: "2",
+				c2: "7518284"
+			});
+			(function() {
+				var s = document.createElement("script"),
+					el = document.getElementsByTagName("script")[0];
+				s.defer = true;
+				s.src = (document.location.protocol == "https:" ? "https://sb" : "http://b") + ".scorecardresearch.com/beacon.js";
+				el.parentNode.insertBefore(s, el);
+			})();
+		</script>
+		<noscript>
+			&lt;p class="robots-nocontent"&gt;&lt;img src="https://sb.scorecardresearch.com/p?c1=2&amp;c2=7518284&amp;c3=&amp;c4=&amp;c5=&amp;c6=&amp;c15=&amp;cv=2.0&amp;cj=1" alt="" style="display:none;" width="1" height="1" /&gt;&lt;/p&gt;
+		</noscript><script src="./Catching circular references in parent-child structures _ sqlsunday.com_files/w.js.download" type="text/javascript" async="" defer=""></script>
+<script type="text/javascript">
+_tkq = window._tkq || [];
+_stq = window._stq || [];
+_tkq.push(['storeContext', {'blog_id':'46976663','blog_tz':'2','user_lang':'en','blog_lang':'en','user_id':'0'}]);
+_stq.push(['view', {'blog':'46976663','v':'wpcom','tz':'2','user_id':'0','post':'1301','subd':'dhmacher'}]);
+_stq.push(['extra', {'crypt':'UE40eW5QN0p8M2Y/RE1TaVhzUzFMbjdWNHpwZGhTayxPSUFCMGNrd29+Smw0TDhnZmRTK0hlRi9QSGh6bi9GXVhBJWIlZlR5U1JMLU8/MkNtblkvY1ctQT1JMnddUyZvOVJScnhzcD9bVGUtZ1BFUEIxP0V2Tz9fVnhmTz16TVFlLjFhaltDbn5jT0s0TUM0eDBvTEVCV1QmbktVTFZLTCxQZHxlYV0sTE4mOHliPXZ4cXBxVEtzdXxULlVLNUdzMm1FPUVDUXZpdSt5elhCeGFlcTNpQndTdzMmLHw5fi1vU3FwW3dGWGd3QkkmMXk9SWxGLUNSPUFLPX4tX1NnYnkxfFh5fGdJRGFQY2RlXVtVdCYtVUkzNElVeld0Uk5+d1NVeEQ5eGg2SE0lY1FlN0ZoJUZjMA=='}]);
+_stq.push([ 'clickTrackerInit', '46976663', '1301' ]);
+	</script>
+<noscript>&lt;img src="https://pixel.wp.com/b.gif?v=noscript" style="height:0px;width:0px;overflow:hidden" alt="" /&gt;</noscript>
+<script>
+if ( 'object' === typeof wpcom_mobile_user_agent_info ) {
+
+	wpcom_mobile_user_agent_info.init();
+	var mobileStatsQueryString = "";
+	
+	if( false !== wpcom_mobile_user_agent_info.matchedPlatformName )
+		mobileStatsQueryString += "&x_" + 'mobile_platforms' + '=' + wpcom_mobile_user_agent_info.matchedPlatformName;
+	
+	if( false !== wpcom_mobile_user_agent_info.matchedUserAgentName )
+		mobileStatsQueryString += "&x_" + 'mobile_devices' + '=' + wpcom_mobile_user_agent_info.matchedUserAgentName;
+	
+	if( wpcom_mobile_user_agent_info.isIPad() )
+		mobileStatsQueryString += "&x_" + 'ipad_views' + '=' + 'views';
+
+	if( "" != mobileStatsQueryString ) {
+		new Image().src = document.location.protocol + '//pixel.wp.com/g.gif?v=wpcom-no-pv' + mobileStatsQueryString + '&baba=' + Math.random();
+	}
+	
+}
+</script>
+
+
+<div id="sharing_email" style="display: none;">
+		<form action="https://sqlsunday.com/2016/04/04/catching-circular-references/" method="post">
+			<label for="target_email">Send to Email Address</label>
+			<input type="email" name="target_email" id="target_email" value="">
+
+			
+				<label for="source_name">Your Name</label>
+				<input type="text" name="source_name" id="source_name" value="">
+
+				<label for="source_email">Your Email Address</label>
+				<input type="email" name="source_email" id="source_email" value="">
+
+						<input type="text" id="jetpack-source_f_name" name="source_f_name" class="input" value="" size="25" autocomplete="off">
+			<script> document.getElementById('jetpack-source_f_name').value = ''; </script>
+			<div class="recaptcha" id="sharing_recaptcha"></div><input type="hidden" name="recaptcha_public_key" id="recaptcha_public_key" value="6LcYW8MSAAAAADBAuEH9yaPcF7lWh11Iq62ZKtoo">
+			<img style="float: right; display: none" class="loading" src="./Catching circular references in parent-child structures _ sqlsunday.com_files/loading.gif" alt="loading" width="16" height="16">
+			<input type="submit" value="Send Email" class="sharing_send">
+			<a rel="nofollow" href="https://sqlsunday.com/2016/04/04/catching-circular-references/#cancel" class="sharing_cancel">Cancel</a>
+
+			<div class="errors errors-1" style="display: none;">
+				Post was not sent - check your email addresses!			</div>
+
+			<div class="errors errors-2" style="display: none;">
+				Email check failed, please try again			</div>
+
+			<div class="errors errors-3" style="display: none;">
+				Sorry, your blog cannot share posts by email.			</div>
+		</form>
+	</div><img src="./Catching circular references in parent-child structures _ sqlsunday.com_files/g.gif" alt=":)" id="wpstats"></body></html>
