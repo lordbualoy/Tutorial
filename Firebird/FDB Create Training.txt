@@ -1,0 +1,37 @@
+create database 'D:\Playground\5802_Anawat\Training.FDB' user 'sysdba' password 'MySenior';
+
+create table items (
+	SysItemID int not null constraint XPKITEMS primary key using index XPKITEMS,
+	Barcode varchar(50) not null constraint XAK1ITEMS unique using index XAK1ITEMS,
+	ItemName varchar(50) not null constraint XAK2ITEMS unique using index XAK2ITEMS,
+	Price numeric(18,4) not null,
+	UnitName varchar(50) not null
+);
+
+create table trans (
+	SysTranNo int not null,
+	TranNo varchar(50) not null,
+	CustomerName varchar(50) not null,
+	DateCreated TIMESTAMP not null,
+	DateModified TIMESTAMP not null,
+	FCancel numeric(1,0) not null,
+	Total numeric(18,4) not null,
+	constraint XPKTRANS primary key (SysTranNo) using index XPKTRANS,
+	constraint XAKTRANS unique (TranNo) using index XAKTRANS
+);
+
+create table trandetailitem (
+	SysTranNo int not null,
+	DetailNo int not null,
+	SysItemID int not null,
+	Barcode varchar(50) not null,
+	ItemName varchar(50) not null,
+	UnitName varchar(50) not null,
+	Quantity numeric(18,4) not null,
+	Price numeric(18,4) not null,
+	Discount numeric(18,4) not null,
+	Amount numeric(18,4) not null,
+	constraint R1TRANDETAILITEM FOREIGN KEY (SysTranNo) REFERENCES trans (SysTranNo) using index R1TRANDETAILITEM,
+	constraint R2TRANDETAILITEM FOREIGN KEY (SysItemID) REFERENCES items (SysItemID) using index R2TRANDETAILITEM,
+	constraint XPKTRANDETAILITEM primary key (SysTranNo,DetailNo) using index XPKTRANDETAILITEM
+);

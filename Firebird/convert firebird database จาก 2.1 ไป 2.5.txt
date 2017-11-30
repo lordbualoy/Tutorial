@@ -1,0 +1,12 @@
+1
+	ปิด service 2.5 และสลับไปรัน service firebird 2.1
+2
+	ไป run cmd ที่ C:\SeniorSoftShell\Firebird_2_1\bin
+3
+	gbak -v -t -user SYSDBA -password "MySenior" C:\aaa.fdb C:\aaa.fbk
+4
+	ปิด service 2.1 และสลับไปรัน service firebird 2.5
+5
+	ไป run cmd ที่ C:\SeniorSoftShell\Firebird_2_5\bin
+6
+	gbak -c -v -user SYSDBA -password "MySenior" C:\aaa.fbk C:\aaa25.fdb
