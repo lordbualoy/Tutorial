@@ -1,0 +1,1 @@
+และไป allow program ให้ผ่าน firewall ได้

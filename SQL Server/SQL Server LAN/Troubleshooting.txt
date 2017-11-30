@@ -1,0 +1,17 @@
+netstat -a -b > %userprofile%\Desktop\netstat.txt
+
+ไว้ดูว่าเครื่องกำลัง listening to port 1433 หรือเปล่า
+หรือว่า port 1433 โดน app ไหนแย่งไปใช้หรือเปล่า
+โดยที่ถูกคือต้องเป็น sqlservr.exe ที่ยึด port 1433
+
+โดยดูเทียบกับ resource manager ใน tab network
+
+allow program / port through firewall
+ขา inbound เลือกเป็นแบบ custom
+allowed program = %ProgramFiles%\Microsoft SQL Server\MSSQL12.SQLEXPRESS2014\MSSQL\Binn\sqlservr.exe
+allowed port = type TCP portnumber 1433
+
+ฝั่ง sv หรือฝั่ง client ต้องเปิด sql server browser ฝั่งใดฝั่งหนึ่งถึงจะต่อผ่าน remote ได้
+
+การเปิด sql server browser ถ้าไม่เปิดจะทำให้ต่อแบบ 192.168.200.ip\InstanceName ไม่ได้
+จะต่อได้แค่ localhost หรือ 192.168.200.ip เท่านั้น
