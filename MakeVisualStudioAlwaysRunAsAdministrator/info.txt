@@ -1,0 +1,13 @@
+-Close all instances of Visual Studio
+-Right click on the Visual Studio 2017 icon in your task bar
+-Right click on Visual Studio 2017 and click Properties
+-Click open File Location button
+-Right-click devenv.exe file in that folder appears
+-Select Troubleshoot compatibility
+-Select Troubleshoot program
+-Select The program requires additional permissions
+-Click Test the program and wait for the program to launch
+-Then click Next button
+-Select Yes, save these settings for this program
+-Click Close
+-Reopen your project from recent list
