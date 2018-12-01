@@ -1,0 +1,35 @@
+การ return ค่าของ Stored Procedure จะมี 3 แบบ จะไม่มี return ค่าได้หลายๆรูปแบบ แบบใน programming language โดยการ return ค่าจะต้องทำในลักษณะ Ref Argument
+-ResultSet คือ ตารางผลลัพธ์ของ Stored Procedure ที่เกิดจากการ Select
+-OutputParameter คือ เหมือน Ref Argument ใน C#
+-ReturnCode คือ Code แสดงสถานะการทำงานของ Stored Procedure เป็นได้แค่ type int เท่านั้น โดยจะได้ค่ามาจากจุด return
+
+ตัวอย่าง
+CREATE PROCEDURE _Proc
+	-- Add the parameters for the stored procedure here
+	@Param int,
+	@RefParam int OUTPUT
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	declare @ReturnCode int
+	SELECT @Param - 1 as ResultSet
+	set @RefParam = @Param - 2
+	set @ReturnCode = @Param - 3
+	return @ReturnCode
+END
+
+วิธีใช้
+DECLARE	@ReturnCode int,
+		@RefOutput int
+
+EXEC	@ReturnCode = _Proc
+		@Param = 5,
+		@RefParam = @RefOutput OUTPUT
+
+select @ReturnCode as ReturnCode, @RefOutput as RefParam;
+
+จะได้ ResultSet = 4, RefParam = 3, ReturnCode = 2
